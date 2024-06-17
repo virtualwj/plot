@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable and Resizable Shapes with Anchored Lines using Rough.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/roughjs@4.3.1/bundled/rough.js"></script>
+    <style>
+        svg {
+            border: 1px solid black;
+        }
+        #menu {
+            margin-bottom: 10px;
+        }
+        #toolbar {
+            position: absolute;
+            display: none;
+            background-color: white;
+            border: 1px solid black;
+            padding: 5px;
+        }
+        #toolbar button {
+            display: block;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="menu">
+    <button onclick="addSquare()">Add Square</button>
+    <button onclick="addCircle()">Add Circle</button>
+</div>
+<div id="toolbar">
+    <button onclick="deleteShape()">Delete</button>
+    <button onclick="groupShapes()">Group</button>
+</div>
+<svg id="svg" width="800" height="600"></svg>
+<script>
+    const svg = document.getElementById('svg');
+    const toolbar = document.getElementById('toolbar');
+
+    const squareSize = 100;
+    const circleRadius = 50;
+    const anchorSize = 5;
+    const controlPointSize = 10;
+
+    const shapes = [];
+    const groups = [];
+
+    let lines = [];
+    let isDrawingLine = false;
+    let currentAnchor = null;
+    let offsetX, offsetY, dragIndex, resizeIndex;
+    let selectedShapeIndex = null;
+    let selectedShapes = [];
+    let isDraggingShape = false;
+    let isDraggingGroup = false;
+
+    function addSquare() {
+        const newSquare = { type: 'square', x: 100, y: 100, size: squareSize, dragging: false, resizing: false, anchors: [], controlPoints: [] };
+        shapes.push(newSquare);
+        draw();
+    }
+
+    function addCircle() {
+        const newCircle = { type: 'circle', x: 300, y: 100, radius: circleRadius, dragging: false, resizing: false, anchors: [], controlPoints: [] };
+        shapes.push(newCircle);
+        draw();
+    }
+
+    function getAnchors(shape) {
+        if (shape.type === 'square') {
+            const { x, y, size } = shape;
+            return [
+                { x: x, y: y }, // Top-left
+                { x: x + size / 2, y: y }, // Top-center
+                { x: x + size, y: y }, // Top-right
+                { x: x, y: y + size / 2 }, // Middle-left
+                { x: x + size, y: y + size / 2 }, // Middle-right
+                { x: x, y: y + size }, // Bottom-left
+                { x: x + size / 2, y: y + size }, // Bottom-center
+                { x: x + size, y: y + size } // Bottom-right
+            ];
+        } else if (shape.type === 'circle') {
+            const { x, y, radius } = shape;
+            return [
+                { x: x - radius, y: y }, // Left
+                { x: x + radius, y: y }, // Right
+                { x: x, y: y - radius }, // Top
+                { x: x, y: y + radius }, // Bottom
+            ];
+        }
+    }
+
+    function getControlPoints(shape) {
+        if (shape.type === 'square') {
+            const { x, y, size } = shape;
+            return [
+                { x: x + size, y: y + size } // Bottom-right
+            ];
+        } else if (shape.type === 'circle') {
+            const { x, y, radius } = shape;
+            return [
+                { x: x + radius, y: y } // Right
+            ];
+        }
+    }
+
+    function draw() {
+        const existingElements = Array.from(svg.children);
+
+        // Draw shapes
+        shapes.forEach((shape, index) => {
+            let shapeElement = existingElements.find(el => el.dataset.index == index && el.dataset.type == 'shape');
+            if (!shapeElement) {
+                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', shape.type === 'square' ? 'rect' : 'circle');
+                shapeElement.dataset.index = index;
+                shapeElement.dataset.type = 'shape';
+                svg.appendChild(shapeElement);
+            }
+
+            if (shape.type === 'square') {
+                shapeElement.setAttribute('x', shape.x);
+                shapeElement.setAttribute('y', shape.y);
+                shapeElement.setAttribute('width', shape.size);
+                shapeElement.setAttribute('height', shape.size);
+            } else if (shape.type === 'circle') {
+                shapeElement.setAttribute('cx', shape.x);
+                shapeElement.setAttribute('cy', shape.y);
+                shapeElement.setAttribute('r', shape.radius);
+            }
+
+            shapeElement.setAttribute('fill', 'none');
+            shapeElement.setAttribute('stroke', 'black');
+        });
+
+        // Draw anchors
+        shapes.forEach((shape, shapeIndex) => {
+            shape.anchors = getAnchors(shape);
+            shape.anchors.forEach((anchor, anchorIndex) => {
+                let anchorElement = existingElements.find(el => el.dataset.shapeIndex == shapeIndex && el.dataset.anchorIndex == anchorIndex && el.dataset.type == 'anchor');
+                if (!anchorElement) {
+                    anchorElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    anchorElement.dataset.shapeIndex = shapeIndex;
+                    anchorElement.dataset.anchorIndex = anchorIndex;
+                    anchorElement.dataset.type = 'anchor';
+                    svg.appendChild(anchorElement);
+                }
+                anchorElement.setAttribute('cx', anchor.x);
+                anchorElement.setAttribute('cy', anchor.y);
+                anchorElement.setAttribute('r', anchorSize);
+                anchorElement.setAttribute('fill', 'blue');
+            });
+        });
+
+        // Draw control points
+        shapes.forEach((shape, shapeIndex) => {
+            shape.controlPoints = getControlPoints(shape);
+            shape.controlPoints.forEach((controlPoint, controlPointIndex) => {
+                let controlPointElement = existingElements.find(el => el.dataset.shapeIndex == shapeIndex && el.dataset.controlPointIndex == controlPointIndex && el.dataset.type == 'controlPoint');
+                if (!controlPointElement) {
+                    controlPointElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    controlPointElement.dataset.shapeIndex = shapeIndex;
+                    controlPointElement.dataset.controlPointIndex = controlPointIndex;
+                    controlPointElement.dataset.type = 'controlPoint';
+                    svg.appendChild(controlPointElement);
+                }
+                controlPointElement.setAttribute('x', controlPoint.x - controlPointSize / 2);
+                controlPointElement.setAttribute('y', controlPoint.y - controlPointSize / 2);
+                controlPointElement.setAttribute('width', controlPointSize);
+                controlPointElement.setAttribute('height', controlPointSize);
+                controlPointElement.setAttribute('fill', 'red');
+            });
+        });
+
+        // Draw lines
+        lines.forEach((line, lineIndex) => {
+            let lineElement = existingElements.find(el => el.dataset.lineIndex == lineIndex && el.dataset.type == 'line');
+            if (!lineElement) {
+                lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                lineElement.dataset.lineIndex = lineIndex;
+                lineElement.dataset.type = 'line';
+                svg.appendChild(lineElement);
+            }
+            lineElement.setAttribute('x1', line.start.x);
+            lineElement.setAttribute('y1', line.start.y);
+            lineElement.setAttribute('x2', line.end.x);
+            lineElement.setAttribute('y2', line.end.y);
+            lineElement.setAttribute('stroke', 'black');
+        });
+
+        // Remove any elements that are no longer in use
+        existingElements.forEach(el => {
+            if (!el.dataset.type) return;
+            const index = parseInt(el.dataset.index || el.dataset.shapeIndex || el.dataset.lineIndex);
+            if (el.dataset.type === 'shape' && !shapes[index]) {
+                svg.removeChild(el);
+            } else if (el.dataset.type === 'anchor' && !shapes[el.dataset.shapeIndex].anchors[el.dataset.anchorIndex]) {
+                svg.removeChild(el);
+            } else if (el.dataset.type === 'controlPoint' && !shapes[el.dataset.shapeIndex].controlPoints[el.dataset.controlPointIndex]) {
+                svg.removeChild(el);
+            } else if (el.dataset.type === 'line' && !lines[index]) {
+                svg.removeChild(el);
+            }
+        });
+    }
+
+    function getMousePos(e) {
+        const rect = svg.getBoundingClientRect();
+        return {
+            x: (e.clientX - rect.left) / (rect.right - rect.left) * svg.width.baseVal.value,
+            y: (e.clientY - rect.top) / (rect.bottom - rect.top) * svg.height.baseVal.value
+        };
+    }
+
+    svg.addEventListener('mousedown', (e) => {
+        const mousePos = getMousePos(e);
+
+        shapes.forEach((shape, index) => {
+            const isInsideSquare = shape.type === 'square' && mousePos.x > shape.x && mousePos.x < shape.x + shape.size && mousePos.y > shape.y && mousePos.y < shape.y + shape.size;
+            const isInsideCircle = shape.type === 'circle' && Math.sqrt((mousePos.x - shape.x) ** 2 + (mousePos.y - shape.y) ** 2) < shape.radius;
+
+            if (isInsideSquare || isInsideCircle) {
+                if (e.shiftKey) {
+                    selectedShapes.push(shape);
+                    isDraggingGroup = true;
+                } else {
+                    selectedShapeIndex = index;
+                    shape.dragging = true;
+                    offsetX = mousePos.x - shape.x;
+                    offsetY = mousePos.y - shape.y;
+                    isDraggingShape = true;
+                }
+            }
+        });
+
+        shapes.forEach((shape, shapeIndex) => {
+            shape.controlPoints.forEach((controlPoint, controlPointIndex) => {
+                if (mousePos.x > controlPoint.x - controlPointSize && mousePos.x < controlPoint.x + controlPointSize &&
+                    mousePos.y > controlPoint.y - controlPointSize && mousePos.y < controlPoint.y + controlPointSize) {
+                    resizeIndex = { shapeIndex, controlPointIndex };
+                    shape.resizing = true;
+                    offsetX = mousePos.x - controlPoint.x;
+                    offsetY = mousePos.y - controlPoint.y;
+                }
+            });
+        });
+
+        shapes.forEach((shape, shapeIndex) => {
+            shape.anchors.forEach((anchor, anchorIndex) => {
+                if (mousePos.x > anchor.x - anchorSize && mousePos.x < anchor.x + anchorSize &&
+                    mousePos.y > anchor.y - anchorSize && mousePos.y < anchor.y + anchorSize) {
+                    isDrawingLine = true;
+                    currentAnchor = { shapeIndex, anchorIndex, x: anchor.x, y: anchor.y };
+                }
+            });
+        });
+    });
+
+    svg.addEventListener('mousemove', (e) => {
+        const mousePos = getMousePos(e);
+
+        if (isDraggingShape && selectedShapeIndex !== null) {
+            const shape = shapes[selectedShapeIndex];
+            shape.x = mousePos.x - offsetX;
+            shape.y = mousePos.y - offsetY;
+
+            // Update line positions based on the new anchor positions
+            lines.forEach(line => {
+                const startShape = shapes[line.start.shapeIndex];
+                const endShape = shapes[line.end.shapeIndex];
+                line.start.x = startShape.anchors[line.start.anchorIndex].x;
+                line.start.y = startShape.anchors[line.start.anchorIndex].y;
+                line.end.x = endShape.anchors[line.end.anchorIndex].x;
+                line.end.y = endShape.anchors[line.end.anchorIndex].y;
+            });
+
+            draw();
+        }
+    });
+
+    svg.addEventListener('mouseup', (e) => {
+        if (isDraggingShape) {
+            isDraggingShape = false;
+            shapes[selectedShapeIndex].dragging = false;
+        } else if (isDrawingLine && currentAnchor) {
+            const mousePos = getMousePos(e);
+
+            let anchorFound = false;
+            shapes.forEach((shape, shapeIndex) => {
+                shape.anchors.forEach((anchor, anchorIndex) => {
+                    if (mousePos.x > anchor.x - anchorSize && mousePos.x < anchor.x + anchorSize &&
+                        mousePos.y > anchor.y - anchorSize && mousePos.y < anchor.y + anchorSize) {
+                        lines.push({
+                            start: { shapeIndex: currentAnchor.shapeIndex, anchorIndex: currentAnchor.anchorIndex, x: currentAnchor.x, y: currentAnchor.y },
+                            end: { shapeIndex, anchorIndex, x: anchor.x, y: anchor.y }
+                        });
+                        anchorFound = true;
+                    }
+                });
+            });
+
+            if (!anchorFound) {
+                // If no anchor found, draw line to current mouse position
+                lines.push({
+                    start: { shapeIndex: currentAnchor.shapeIndex, anchorIndex: currentAnchor.anchorIndex, x: currentAnchor.x, y: currentAnchor.y },
+                    end: { x: mousePos.x, y: mousePos.y }
+                });
+            }
+
+            isDrawingLine = false;
+            currentAnchor = null;
+            draw();
+        }
+    });
+
+    function hideToolbar() {
+        toolbar.style.display = 'none';
+    }
+
+    function deleteShape() {
+        if (selectedShapeIndex !== null) {
+            const deletedShape = shapes.splice(selectedShapeIndex, 1)[0];
+
+            // Remove lines connected to the deleted shape
+            lines = lines.filter(line => line.start.shapeIndex !== selectedShapeIndex && line.end.shapeIndex !== selectedShapeIndex);
+
+            // Update remaining lines' shape indices
+            lines.forEach(line => {
+                if (line.start.shapeIndex > selectedShapeIndex) line.start.shapeIndex--;
+                if (line.end.shapeIndex > selectedShapeIndex) line.end.shapeIndex--;
+            });
+
+            selectedShapeIndex = null;
+            draw();
+        }
+    }
+
+    function groupShapes() {
+        if (selectedShapes.length > 0) {
+            groups.push({ shapes: selectedShapes });
+            selectedShapes = [];
+            draw();
+        }
+    }
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const mousePos = getMousePos(e);
+        selectedShapeIndex = null;
+
+        shapes.forEach((shape, shapeIndex) => {
+            if (shape.type === 'square') {
+                if (mousePos.x > shape.x && mousePos.x < shape.x + shape.size &&
+                    mousePos.y > shape.y && mousePos.y < shape.y + shape.size) {
+                    selectedShapeIndex = shapeIndex;
+                }
+            } else if (shape.type === 'circle') {
+                if (Math.sqrt((mousePos.x - shape.x) ** 2 + (mousePos.y - shape.y) ** 2) < shape.radius) {
+                    selectedShapeIndex = shapeIndex;
+                }
+            }
+        });
+
+        if (selectedShapeIndex !== null) {
+            toolbar.style.display = 'block';
+            toolbar.style.left = `${e.pageX}px`;
+            toolbar.style.top = `${e.pageY}px`;
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideToolbar();
+        }
+    });
+</script>
+</body>
+</html>

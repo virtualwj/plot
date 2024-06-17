@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "umd": "dist/index.umd.js",
+  "module": "./src/index.ts",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && rollup -c"

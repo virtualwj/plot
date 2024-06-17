@@ -1,7 +1,5 @@
 import {createApp} from 'vue'
-import App from './App.vue'
+import App from './Svg.vue'
 import "./index.css"
-import add from "@sketch-flow/core"
 createApp(App).mount('#app')
 
-console.log(add)
