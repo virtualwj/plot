@@ -1,0 +1,22 @@
+html,body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+canvas {
+    border: 1px solid black;
+}
+#menu {
+    margin-bottom: 10px;
+}
+#toolbar {
+    position: absolute;
+    display: none;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+}
+#toolbar button {
+    display: block;
+    margin: 5px 0;
+}

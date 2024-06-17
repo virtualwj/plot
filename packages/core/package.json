@@ -2,8 +2,12 @@
   "name": "@sketch-flow/core",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "umd": "dist/index.umd.js",
   "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && rollup -c"
   },
   "author": "",
   "license": "ISC"
