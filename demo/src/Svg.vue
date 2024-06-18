@@ -11,52 +11,43 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Graph, render} from "@sketch-flow/core"
+import {Graph, render, Rect, Circle} from "@sketch-flow/core"
 let graph: Graph
 function addSquare(){
-    const newSquare = {
-        type: 'square',
+    graph.addNode(new Rect({
         x: 100,
         y: 100,
-        size: 100,
-        dragging: false,
-        resizing: false,
-        anchors: [],
-        controlPoints: []
-    };
-    graph.addNode(newSquare)
+        w: 100,
+        h: 100,
+    }, graph))
 }
 function addCircle() {
-    const newCircle = {
-        type: 'circle',
+    graph.addNode(new Circle({
         x: 300,
         y: 100,
-        radius: 50,
-        dragging: false,
-        resizing: false,
-        anchors: [],
-        controlPoints: []
-    };
-    graph.addNode(newCircle)
+        r: 50,
+    }, graph))
 }
 
 function deleteShape() {
     graph.deleteNode()
 }
 
-const container = ref<SVGSVGElement>();
+function deleteNode() {
+    graph.deleteNode()
+}
+
+const container = ref<HTMLCanvasElement>();
 const toolbar = ref<HTMLDivElement>();
 onMounted(() => {
     graph = render(container.value as HTMLCanvasElement, {
         toolbar: toolbar.value as HTMLDivElement,
         engine: "svg"
     })
+    addSquare()
+    addCircle()
 })
 </script>
 
-<style scoped>
-#svg {
-    border: 1px solid #999;
-}
-</style>
+
 

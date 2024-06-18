@@ -1,5 +1,5 @@
 {
-  "name": "@sketch-flow/core",
+  "name": "@sketch-flow/render",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
@@ -9,8 +9,5 @@
     "build": "npm run clean && rollup -c"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@sketch-flow/render": "workspace:^"
-  }
+  "license": "ISC"
 }

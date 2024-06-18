@@ -1,8 +1,8 @@
-import {Graph} from "./Graph";
-import {GraphOptions} from "../index";
+import {Graph, GraphOptions} from "./Graph";
 
 export function render(el: HTMLCanvasElement, options: GraphOptions){
   return new Graph(el, options)
 }
-export * from './svg/index'
-export * from './Graph'
+export * from "@sketch-flow/render"
+export * from "./Graph";
+export * from "./nodes/index";

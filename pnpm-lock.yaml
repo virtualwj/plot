@@ -52,7 +52,13 @@ importers:
         specifier: ^3.4.29
         version: 3.4.29(typescript@5.4.5)
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      '@sketch-flow/render':
+        specifier: workspace:^
+        version: link:../render
+
+  packages/render: {}
 
 packages:
 

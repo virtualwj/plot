@@ -2,6 +2,7 @@
     <div id="menu">
         <button @click="addSquare">Add Square</button>
         <button @click="addCircle">Add Circle</button>
+        <button @click="deleteNode">删除第一个</button>
     </div>
     <div id="toolbar" ref="toolbar">
         <button @click="deleteShape">Delete</button>
@@ -11,36 +12,29 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Graph, render} from "@sketch-flow/core"
+import {Graph, render, Rect, Circle} from "@sketch-flow/core"
 let graph: Graph
 function addSquare(){
-    const newSquare = {
-        type: 'square',
+    graph.addNode(new Rect({
         x: 100,
         y: 100,
-        size: 100,
-        dragging: false,
-        resizing: false,
-        anchors: [],
-        controlPoints: []
-    };
-    graph.addNode(newSquare)
+        w: 100,
+        h: 100,
+    }, graph))
 }
 function addCircle() {
-    const newCircle = {
-        type: 'circle',
+    graph.addNode(new Circle({
         x: 300,
         y: 100,
-        radius: 50,
-        dragging: false,
-        resizing: false,
-        anchors: [],
-        controlPoints: []
-    };
-    graph.addNode(newCircle)
+        r: 50,
+    }, graph))
 }
 
 function deleteShape() {
+    graph.deleteNode()
+}
+
+function deleteNode() {
     graph.deleteNode()
 }
 
@@ -49,8 +43,12 @@ const toolbar = ref<HTMLDivElement>();
 onMounted(() => {
     graph = render(container.value as HTMLCanvasElement, {
         toolbar: toolbar.value as HTMLDivElement,
-        engine: "canvas"
+        engine: "canvas",
+        width: "800px",
+        height: "600px"
     })
+    addSquare()
+    addCircle()
 })
 </script>
 

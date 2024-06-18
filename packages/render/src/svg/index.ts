@@ -21,13 +21,10 @@ export class SVGDrawer {
     circle.setAttribute('cx', cx.toString());
     circle.setAttribute('cy', cy.toString());
     circle.setAttribute('r', radius.toString());
-    if (fill) {
-      circle.setAttribute('fill', fill);
-    }
-    if (stroke) {
-      circle.setAttribute('stroke', stroke);
-      circle.setAttribute('stroke-width', lineWidth.toString());
-    }
+    circle.setAttribute('fill', fill || "#fff");
+    circle.setAttribute('stroke', stroke || "#333");
+    circle.setAttribute('stroke-width', lineWidth ? lineWidth.toString() : "1px");
+
     this.svg.appendChild(circle);
   }
 
@@ -38,13 +35,9 @@ export class SVGDrawer {
     rect.setAttribute('y', y.toString());
     rect.setAttribute('width', width.toString());
     rect.setAttribute('height', height.toString());
-    if (fill) {
-      rect.setAttribute('fill', fill);
-    }
-    if (stroke) {
-      rect.setAttribute('stroke', stroke);
-      rect.setAttribute('stroke-width', lineWidth.toString());
-    }
+    rect.setAttribute('fill', fill || "#fff");
+    rect.setAttribute('stroke', stroke || "#333");
+    rect.setAttribute('stroke-width', lineWidth ? lineWidth.toString() : "1px");
     this.svg.appendChild(rect);
   }
 
