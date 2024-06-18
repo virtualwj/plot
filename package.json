@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "pnpm -r --filter=@sketch-flow/demo run dev",
-    "build": "pnpm --filter=!@sketch-flow/demo run build"
+    "dev": "pnpm -r --filter=@plot/demo run dev",
+    "build": "pnpm --filter=!@plot/demo run build"
   },
   "keywords": [],
   "author": "",

@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Graph, render, Rect, Circle} from "@sketch-flow/core"
+import {Graph, render, Rect, Circle} from "@plot/core"
 let graph: Graph
 function addSquare(){
     graph.addNode(new Rect({

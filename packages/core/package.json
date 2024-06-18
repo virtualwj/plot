@@ -1,5 +1,5 @@
 {
-  "name": "@sketch-flow/core",
+  "name": "@plot/core",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
@@ -11,6 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sketch-flow/render": "workspace:^"
+    "@plot/render": "workspace:^"
   }
 }

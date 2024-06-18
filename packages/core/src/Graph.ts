@@ -1,4 +1,4 @@
-import {SVGDrawer, CanvasDrawer} from "@sketch-flow/render";
+import {SVGDrawer, CanvasDrawer} from "@plot/render";
 import {Node} from "./nodes/Node";
 import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";

@@ -1,5 +1,5 @@
 {
-  "name": "@sketch-flow/demo",
+  "name": "@plot/demo",
   "version": "1.0.0",
   "description": "",
   "author": "",
@@ -14,6 +14,6 @@
     "vue": "^3.4.29"
   },
   "dependencies": {
-    "@sketch-flow/core": "workspace:^"
+    "@plot/core": "workspace:^"
   }
 }

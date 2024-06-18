@@ -16,7 +16,7 @@
     "allowJs": true,
     "checkJs": false,
     "paths": {
-      "@sketch-flow/*": ["packages/*/dist", "packages/*/src"]
+      "@plot/*": ["packages/*/dist", "packages/*/src"]
     },
     "lib": [
       "esnext",

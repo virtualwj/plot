@@ -38,7 +38,7 @@ importers:
 
   demo:
     dependencies:
-      '@sketch-flow/core':
+      '@plot/core':
         specifier: workspace:^
         version: link:../packages/core
     devDependencies:
@@ -54,7 +54,7 @@ importers:
 
   packages/core:
     dependencies:
-      '@sketch-flow/render':
+      '@plot/render':
         specifier: workspace:^
         version: link:../render
 

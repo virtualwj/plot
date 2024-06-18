@@ -49,7 +49,7 @@ export default {
         compilerOptions: {
           declaration: true,
           paths: {
-            '@sketch-flow/*': ['packages/*/src'],
+            '@plot/*': ['packages/*/src'],
           },
         },
         include: null,
