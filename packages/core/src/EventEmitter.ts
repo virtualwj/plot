@@ -1,9 +1,9 @@
-type StringKeyOf<T> = Extract<keyof T, string>
-type CallbackType<
+export type StringKeyOf<T> = Extract<keyof T, string>
+export type CallbackType<
   T extends Record<string, any>,
   EventName extends StringKeyOf<T>,
 > = T[EventName] extends any[] ? T[EventName] : [T[EventName]]
-type CallbackFunction<
+export type CallbackFunction<
   T extends Record<string, any>,
   EventName extends StringKeyOf<T>,
 > = (...props: CallbackType<T, EventName>) => any
@@ -26,7 +26,13 @@ export class EventEmitter<T extends Record<string, any>> {
     const callbacks = this.callbacks[event]
 
     if (callbacks) {
-      callbacks.forEach(callback => callback.apply(this, args))
+      for (let i = 0; i < callbacks.length; i++) {
+        if (callbacks[i].apply(this, args)) {
+          //返回true，停止向下执行
+          break;
+        }
+      }
+      // callbacks.forEach(callback => callback.apply(this, args))
     }
 
     return this

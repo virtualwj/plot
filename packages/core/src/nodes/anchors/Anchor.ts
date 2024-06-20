@@ -8,7 +8,7 @@ export interface AnchorOptions {
 }
 
 export class Anchor extends Node {
-  public anchorSize = 4;
+  public anchorSize = 24;
   public x: number;
   public y: number;
   public graph: Graph;

@@ -3,6 +3,11 @@
         <button @click="addSquare">Add Square</button>
         <button @click="addCircle">Add Circle</button>
         <button @click="addPolygon">Add Polygon</button>
+        <button @click="addPolygon">Add Star</button>
+
+        <button @click="dragMode">Drag</button>
+        <button @click="painterMode">Painter</button>
+
         <button @click="deleteNode">删除第一个</button>
     </div>
     <div id="toolbar" ref="toolbar">
@@ -15,7 +20,6 @@
 import {onMounted, ref} from "vue";
 import {Graph, render, Rect, Circle, Polygon} from "@plot/core"
 import {GuideLine} from "@plot/plugin-guide-line";
-import {Mesh} from "@plot/plugin-mesh";
 let graph: Graph
 function addSquare(){
     graph.addNode(new Rect({
@@ -41,7 +45,24 @@ function deleteNode() {
     graph.deleteNode()
 }
 
+function dragMode() {
+    graph.mode = 'drag'
+}
+function painterMode() {
+    graph.mode = 'painter'
+}
+
 function addPolygon(){
+    graph.addNode(new Polygon([
+        [400, 150],
+        [500, 50],
+        [600, 150],
+        [550, 250],
+        [450, 250]
+    ], graph))
+}
+
+function addStar(){
     graph.addNode(new Polygon([
         [400, 150],
         [500, 50],

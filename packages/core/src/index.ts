@@ -7,3 +7,4 @@ export * from "@plot/render"
 export * from "./Graph";
 export * from "./nodes/index";
 export * from "./Plugin";
+export * from "./plugins/index";

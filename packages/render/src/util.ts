@@ -26,3 +26,7 @@ export function calculateCircleBoundingBox(center: Point, radius: number) {
   };
 }
 
+// 定义排序函数
+export function sortArrayDescending(arr:Array<any>, key:string) {
+  return arr.sort((a, b) => b[key] - a[key]);
+}

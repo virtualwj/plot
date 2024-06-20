@@ -1,11 +1,11 @@
-import {SVGDrawer, CanvasDrawer} from "@plot/render";
+import {SVGDrawer, CanvasDrawer, sortArrayDescending} from "@plot/render";
 import {Node} from "./nodes/Node";
 import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";
 import {Anchor} from "./nodes/anchors/Anchor";
-import {EventManager} from "./EventManager";
-import {Painter} from "./painter/Painter";
+// import {EventManager} from "./EventManager";
 import {Plugin} from "./Plugin";
+import {Drag, Painter, TextPainter, LineShape} from "./plugins";
 
 // 声明 Graph 类
 export interface GraphOptions {
@@ -14,7 +14,9 @@ export interface GraphOptions {
   plugin?: Array<typeof Plugin>
 }
 
-interface GraphEvent {
+export type GraphMode = "drag" | "painter"
+
+export interface GraphEvent {
   mousedown: { e: MouseEvent, x: number, y: number },
   mouseup: { e: MouseEvent, x: number, y: number },
   mousemove: { e: MouseEvent, x: number, y: number },
@@ -25,6 +27,7 @@ interface GraphEvent {
   click: { e: MouseEvent, x: number, y: number },
 }
 
+
 /**
  * Graph 类
  */
@@ -33,15 +36,15 @@ export class Graph extends EventEmitter<GraphEvent> {
   edges: Array<Edge>
   engine: CanvasDrawer | SVGDrawer
   toolbar: HTMLDivElement
-  painter: Painter
   plugin: Array<Plugin>
+  __mode: GraphMode = 'drag'
 
   isAddingEdge = false
-  isAddingStartAnchor?: Anchor
+  isAddingStartAnchor?: Anchor | null
   isMovingNode = false
   movingNode?: Node | null
 
-  eventManager: EventManager
+  // eventManager: EventManager
 
   //被选中的Node
   selectedNode!: null | Node
@@ -55,19 +58,24 @@ export class Graph extends EventEmitter<GraphEvent> {
       plugin: []
     }, options)
     this.toolbar = options.toolbar;
-    this.painter = new Painter();
 
     if (this.options.engine === 'svg') {
       this.engine = new SVGDrawer(element as SVGSVGElement);
     } else {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
+
+    this.options.plugin = [LineShape, Drag, Painter,TextPainter,].concat(this.options.plugin || []);
+    this.options.plugin = sortArrayDescending(this.options.plugin, "priority")
     this.plugin = this.options.plugin!.map(plugin => {
+      console.log(plugin)
       return new plugin(this);
     })
 
     this.bindEvent()
-    this.eventManager = new EventManager(this);
+    // this.eventManager = new EventManager(this);
+    this.mode = this.__mode;
+    console.log(this)
   }
 
   /**
@@ -89,6 +97,17 @@ export class Graph extends EventEmitter<GraphEvent> {
       this.draw()
       this.hideToolbar()
     }
+  }
+
+  get mode() {
+    return this.__mode
+  }
+
+  set mode(mode) {
+    this.__mode = mode;
+    this.plugin.forEach(plugin => {
+      plugin.modeChanged(mode);
+    })
   }
 
   getElementSize() {
