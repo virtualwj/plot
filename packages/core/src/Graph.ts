@@ -22,6 +22,7 @@ interface GraphEvent {
   contextmenu: { e: MouseEvent, x: number, y: number },
   dblclick: { e: MouseEvent, x: number, y: number },
   wheel: { e: MouseEvent, x: number, y: number },
+  click: { e: MouseEvent, x: number, y: number },
 }
 
 /**
@@ -145,7 +146,7 @@ export class Graph extends EventEmitter<GraphEvent> {
   }
 
   bindEvent() {
-    ["mousedown", "mousemove", "mouseup", "mouseleave", "dblclick", "contextmenu", "wheel"].forEach(name => {
+    ["mousedown", "mousemove", "mouseup", "mouseleave", "dblclick", "contextmenu", "wheel", "click"].forEach(name => {
       this.element.addEventListener(name, (event) => {
         const e = event as MouseEvent;
         const {x, y} = this.getMousePos(e)

@@ -54,7 +54,7 @@ export class SVGDrawer {
     //待补充
   }
 
-  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions>) {
+  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions> = {} ) {
     const {font, color, align, baseline} = Object.assign({
       font: '12px Arial',
       color: 'black',
@@ -62,5 +62,23 @@ export class SVGDrawer {
       baseline: 'top'
     }, options);
     //待补充
+  }
+
+  getTextBounding(text: string, fontSize: number = 14) {
+    let textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textEl.textContent = text;
+    textEl.setAttribute('font-size', fontSize.toString());
+    textEl.setAttribute('font-family', 'Arial');
+    // 将Text元素添加到SVG中
+    this.svg.appendChild(textEl);
+    // 获取文字的尺寸
+    var bbox = textEl.getBBox();
+    var textWidth = bbox.width;
+    var textHeight = bbox.height;
+    textEl.remove();
+    return {
+      w: textWidth,
+      h: textHeight
+    }
   }
 }

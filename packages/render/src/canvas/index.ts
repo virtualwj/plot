@@ -89,7 +89,7 @@ export class CanvasDrawer {
     this.ctx.scale(dpr, dpr);
   }
 
-  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions>) {
+  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions> = {}) {
     const {font, color, align, baseline} = Object.assign({
       font: '12px Arial',
       color: 'black',
@@ -104,4 +104,16 @@ export class CanvasDrawer {
     this.ctx.fillText(text, x, y);
     this.ctx.closePath();
   }
+
+  getTextBounding(text: string, fontSize: number = 14) {
+    this.ctx.font = fontSize + 'px ' + "Arial";
+    var textMetrics = this.ctx.measureText(text);
+    var textWidth = textMetrics.width;
+    var textHeight = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
+    return {
+      w: textWidth,
+      h: textHeight
+    }
+  }
+
 }
