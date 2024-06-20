@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas with Movable and Scalable Grid with Adaptive Labels</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let dragStart = { x: 0, y: 0 };
+    let dragging = false;
+
+    // 动态计算刻度间隔
+    function getStep() {
+        if (scale > 2) return 10;
+        if (scale > 1) return 20;
+        if (scale > 0.5) return 50;
+        return 100;
+    }
+
+    // 绘制刻度线和标签
+    function drawGrid() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+
+        const step = getStep();
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1 / scale;
+        ctx.font = `${10 / scale}px Arial`;
+        ctx.fillStyle = 'black';
+
+        // 水平刻度线和标签
+        for (let i = Math.floor(-offsetX / scale / step) * step; i < canvas.width / scale - offsetX / scale; i += step) {
+            ctx.beginPath();
+            ctx.moveTo(i, -offsetY / scale);
+            ctx.lineTo(i, (canvas.height - offsetY) / scale);
+            ctx.stroke();
+            ctx.fillText(i, i + 2, -offsetY / scale + 12 / scale);
+        }
+
+        // 垂直刻度线和标签
+        for (let j = Math.floor(-offsetY / scale / step) * step; j < canvas.height / scale - offsetY / scale; j += step) {
+            ctx.beginPath();
+            ctx.moveTo(-offsetX / scale, j);
+            ctx.lineTo((canvas.width - offsetX) / scale, j);
+            ctx.stroke();
+            ctx.fillText(j, -offsetX / scale + 2, j + 12 / scale);
+        }
+
+        ctx.restore();
+    }
+
+    // 鼠标按下事件
+    canvas.addEventListener('mousedown', (e) => {
+        dragging = true;
+        dragStart.x = e.clientX - offsetX;
+        dragStart.y = e.clientY - offsetY;
+    });
+
+    // 鼠标移动事件
+    canvas.addEventListener('mousemove', (e) => {
+        if (dragging) {
+            offsetX = e.clientX - dragStart.x;
+            offsetY = e.clientY - dragStart.y;
+            drawGrid();
+        }
+    });
+
+    // 鼠标松开事件
+    canvas.addEventListener('mouseup', () => {
+        dragging = false;
+    });
+
+    // 鼠标滚轮事件
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const mouseX = (e.clientX - offsetX) / scale;
+        const mouseY = (e.clientY - offsetY) / scale;
+        const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+        scale *= zoom;
+        offsetX = e.clientX - mouseX * scale;
+        offsetY = e.clientY - mouseY * scale;
+        drawGrid();
+    });
+
+    drawGrid();
+</script>
+</body>
+</html>

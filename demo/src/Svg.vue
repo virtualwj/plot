@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
 import {Graph, render, Rect, Circle} from "@plot/core"
+import {GuideLine} from "@plot/plugin-guide-line";
 let graph: Graph
 function addSquare(){
     graph.addNode(new Rect({
@@ -42,7 +43,8 @@ const toolbar = ref<HTMLDivElement>();
 onMounted(() => {
     graph = render(container.value as HTMLCanvasElement, {
         toolbar: toolbar.value as HTMLDivElement,
-        engine: "svg"
+        engine: "svg",
+        plugin: [GuideLine]
     })
     addSquare()
     addCircle()

@@ -1,0 +1,19 @@
+{
+  "name": "@plot/plugin-mesh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.cjs",
+  "module": "./src/index.ts",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerdependencies": {
+    "@plot/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@plot/core": "workspace:^"
+  }
+}

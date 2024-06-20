@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable and Resizable Shapes with Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #menu {
+            margin-bottom: 10px;
+        }
+        #toolbar {
+            position: absolute;
+            display: none;
+            background-color: white;
+            border: 1px solid black;
+            padding: 5px;
+        }
+        #toolbar button {
+            display: block;
+            margin: 5px 0;
+        }
+        .text-input {
+            position: absolute;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="menu">
+    <button onclick="addSquare()">Add Square</button>
+    <button onclick="addCircle()">Add Circle</button>
+</div>
+<div id="toolbar">
+    <button onclick="deleteShape()">Delete</button>
+    <button onclick="groupShapes()">Group</button>
+</div>
+<canvas id="canvas" width="800" height="600"></canvas>
+<input type="text" id="textInput" class="text-input" />
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const textInput = document.getElementById('textInput');
+
+    const squareSize = 100;
+    const circleRadius = 50;
+    const anchorSize = 5;
+    const controlPointSize = 10;
+    const alignThreshold = 5;
+
+    const shapes = [];
+    const groups = [];
+    let lines = [];
+    let alignmentLines = [];
+    let isDrawingLine = false;
+    let currentAnchor = null;
+    let offsetX, offsetY, dragIndex, resizeIndex;
+    let selectedShapeIndex = null;
+    let selectedShapes = [];
+    let isDraggingShape = false;
+    let isDraggingGroup = false;
+    let highlightedShape = null;
+    let texts = []; // Store text objects
+
+    function addSquare() {
+        const newSquare = { type: 'square', x: 100, y: 100, size: squareSize, dragging: false, resizing: false, anchors: [], controlPoints: [] };
+        shapes.push(newSquare);
+        draw();
+    }
+
+    function addCircle() {
+        const newCircle = { type: 'circle', x: 300, y: 100, radius: circleRadius, dragging: false, resizing: false, anchors: [], controlPoints: [] };
+        shapes.push(newCircle);
+        draw();
+    }
+
+    function getAnchors(shape) {
+        if (shape.type === 'square') {
+            const { x, y, size } = shape;
+            return [
+                { x: x, y: y }, // Top-left
+                { x: x + size / 2, y: y }, // Top-center
+                { x: x + size, y: y }, // Top-right
+                { x: x, y: y + size / 2 }, // Middle-left
+                { x: x + size, y: y + size / 2 }, // Middle-right
+                { x: x, y: y + size }, // Bottom-left
+                { x: x + size / 2, y: y + size }, // Bottom-center
+                { x: x + size, y: y + size } // Bottom-right
+            ];
+        } else if (shape.type === 'circle') {
+            const { x, y, radius } = shape;
+            return [
+                { x: x - radius, y: y }, // Left
+                { x: x + radius, y: y }, // Right
+                { x: x, y: y - radius }, // Top
+                { x: x, y: y + radius } // Bottom
+            ];
+        }
+    }
+
+    function getControlPoints(shape) {
+        if (shape.type === 'square') {
+            const { x, y, size } = shape;
+            return [
+                { x: x + size, y: y + size } // Bottom-right
+            ];
+        } else if (shape.type === 'circle') {
+            const { x, y, radius } = shape;
+            return [
+                { x: x + radius, y: y } // Right
+            ];
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw shapes
+        shapes.forEach((shape, index) => {
+            ctx.beginPath();
+            if (shape.type === 'square') {
+                ctx.rect(shape.x, shape.y, shape.size, shape.size);
+            } else if (shape.type === 'circle') {
+                ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
+            }
+            ctx.fillStyle = 'none';
+            ctx.strokeStyle = highlightedShape === index ? 'blue' : 'black';
+            ctx.stroke();
+            ctx.closePath();
+        });
+
+        // Draw anchors
+        shapes.forEach(shape => {
+            shape.anchors = getAnchors(shape);
+            shape.anchors.forEach(anchor => {
+                ctx.beginPath();
+                ctx.arc(anchor.x, anchor.y, anchorSize, 0, 2 * Math.PI);
+                ctx.fillStyle = 'blue';
+                ctx.fill();
+                ctx.closePath();
+            });
+        });
+
+        // Draw control points
+        shapes.forEach(shape => {
+            shape.controlPoints = getControlPoints(shape);
+            shape.controlPoints.forEach(controlPoint => {
+                ctx.beginPath();
+                ctx.rect(controlPoint.x - controlPointSize / 2, controlPoint.y - controlPointSize / 2, controlPointSize, controlPointSize);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.closePath();
+            });
+        });
+
+        // Draw lines
+        lines.forEach(line => {
+            ctx.beginPath();
+            ctx.moveTo(line.start.x, line.start.y);
+            ctx.lineTo(line.end.x, line.end.y);
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+            ctx.closePath();
+        });
+
+        // Draw alignment lines
+        alignmentLines.forEach(line => {
+            ctx.beginPath();
+            ctx.moveTo(line.start.x, line.start.y);
+            ctx.lineTo(line.end.x, line.end.y);
+            ctx.strokeStyle = 'red';
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.closePath();
+        });
+
+        // Draw texts
+        texts.forEach(text => {
+            ctx.fillStyle = 'black';
+            ctx.fillText(text.content, text.x, text.y);
+        });
+    }
+
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+            y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+        };
+    }
+
+    function showAlignmentLines(shape) {
+        alignmentLines = [];
+        const shapeAnchors = getAnchors(shape);
+        shapes.forEach(otherShape => {
+            if (otherShape !== shape) {
+                const otherAnchors = getAnchors(otherShape);
+                shapeAnchors.forEach(anchor => {
+                    otherAnchors.forEach(otherAnchor => {
+                        if (Math.abs(anchor.x - otherAnchor.x) < alignThreshold) {
+                            alignmentLines.push({
+                                start: { x: otherAnchor.x, y: 0 },
+                                end: { x: otherAnchor.x, y: canvas.height }
+                            });
+                        }
+                        if (Math.abs(anchor.y - otherAnchor.y) < alignThreshold) {
+                            alignmentLines.push({
+                                start: { x: 0, y: otherAnchor.y },
+                                end: { x: canvas.width, y: otherAnchor.y }
+                            });
+                        }
+                    });
+                });
+            }
+        });
+        draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const mousePos = getMousePos(e);
+
+        shapes.forEach((shape, index) => {
+            const isInsideSquare = shape.type === 'square' && mousePos.x > shape.x && mousePos.x < shape.x + shape.size && mousePos.y > shape.y && mousePos.y < shape.y + shape.size;
+            const isInsideCircle = shape.type === 'circle' && Math.sqrt((mousePos.x - shape.x) ** 2 + (mousePos.y - shape.y) ** 2) < shape.radius;
+
+            if (isInsideSquare || isInsideCircle) {
+                if (e.shiftKey) {
+                    selectedShapes.push(shape);
+                    isDraggingGroup = true;
+                } else {
+                    selectedShapeIndex = index;
+                    shape.dragging = true;
+                    offsetX = mousePos.x - shape.x;
+                    offsetY = mousePos.y - shape.y;
+                    isDraggingShape = true;
+                    showAlignmentLines(shape);
+                    highlightedShape = index; // Highlight the selected shape
+                    draw();
+                }
+            }
+        });
+
+        shapes.forEach((shape, shapeIndex) => {
+            shape.controlPoints.forEach((controlPoint, controlPointIndex) => {
+                if (mousePos.x > controlPoint.x - controlPointSize && mousePos.x < controlPoint.x + controlPointSize &&
+                    mousePos.y > controlPoint.y - controlPointSize && mousePos.y < controlPoint.y + controlPointSize) {
+                    shape.resizing = true;
+                    resizeIndex = shapeIndex;
+                }
+            });
+        });
+
+        if (selectedShapeIndex !== null) {
+            const selectedShape = shapes[selectedShapeIndex];
+            const anchors = getAnchors(selectedShape);
+
+            anchors.forEach((anchor, anchorIndex) => {
+                if (Math.abs(mousePos.x - anchor.x) < anchorSize && Math.abs(mousePos.y - anchor.y) < anchorSize) {
+                    currentAnchor = { shape: selectedShape, anchorIndex };
+                }
+            });
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        const mousePos = getMousePos(e);
+
+        if (isDraggingShape) {
+            const shape = shapes[selectedShapeIndex];
+            shape.x = mousePos.x - offsetX;
+            shape.y = mousePos.y - offsetY;
+            showAlignmentLines(shape);
+            draw();
+        }
+
+        if (currentAnchor) {
+            const { shape, anchorIndex } = currentAnchor;
+            const anchors = getAnchors(shape);
+            const oppositeAnchor = anchors[(anchorIndex + 4) % 8];
+            const newSize = Math.max(Math.abs(mousePos.x - oppositeAnchor.x), Math.abs(mousePos.y - oppositeAnchor.y));
+            shape.size = newSize;
+            draw();
+        }
+
+        if (shapes[resizeIndex]?.resizing) {
+            const shape = shapes[resizeIndex];
+            if (shape.type === 'square') {
+                shape.size = mousePos.x - shape.x;
+            } else if (shape.type === 'circle') {
+                shape.radius = mousePos.x - shape.x;
+            }
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDraggingShape = false;
+        shapes.forEach(shape => shape.dragging = false);
+        currentAnchor = null;
+        shapes.forEach(shape => shape.resizing = false);
+        resizeIndex = null;
+        alignmentLines = [];
+        draw();
+    });
+
+    canvas.addEventListener('click', (e) => {
+        const mousePos = getMousePos(e);
+
+        if (e.altKey) {
+            textInput.style.left = `${e.clientX}px`;
+            textInput.style.top = `${e.clientY}px`;
+            textInput.style.display = 'block';
+            textInput.focus();
+
+            textInput.addEventListener('keypress', function handleEnter(event) {
+                if (event.key === 'Enter') {
+                    const newText = {
+                        content: textInput.value,
+                        x: mousePos.x,
+                        y: mousePos.y
+                    };
+                    texts.push(newText);
+                    textInput.style.display = 'none';
+                    textInput.value = '';
+                    textInput.removeEventListener('keypress', handleEnter);
+                    draw();
+                }
+            });
+        }
+    });
+
+    canvas.addEventListener('dblclick', (e) => {
+        const mousePos = getMousePos(e);
+        textInput.style.left = `${e.clientX}px`;
+        textInput.style.top = `${e.clientY}px`;
+        textInput.style.display = 'block';
+        textInput.focus();
+
+        textInput.addEventListener('keypress', function handleEnter(event) {
+            if (event.key === 'Enter') {
+                const newText = {
+                    content: textInput.value,
+                    x: mousePos.x,
+                    y: mousePos.y
+                };
+                texts.push(newText);
+                textInput.style.display = 'none';
+                textInput.value = '';
+                textInput.removeEventListener('keypress', handleEnter);
+                draw();
+            }
+        });
+    });
+
+    function deleteShape() {
+        if (selectedShapeIndex !== null) {
+            shapes.splice(selectedShapeIndex, 1);
+            selectedShapeIndex = null;
+            draw();
+        }
+    }
+
+    function groupShapes() {
+        if (selectedShapes.length > 1) {
+            const group = selectedShapes;
+            groups.push(group);
+            selectedShapes = [];
+            draw();
+        }
+    }
+
+    draw();
+</script>
+</body>
+</html>

@@ -41,6 +41,12 @@ importers:
       '@plot/core':
         specifier: workspace:^
         version: link:../packages/core
+      '@plot/plugin-guide-line':
+        specifier: workspace:^
+        version: link:../packages/plugin-guide-line
+      '@plot/plugin-mesh':
+        specifier: workspace:^
+        version: link:../packages/plugin-mesh
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.5
@@ -57,6 +63,18 @@ importers:
       '@plot/render':
         specifier: workspace:^
         version: link:../render
+
+  packages/plugin-guide-line:
+    devDependencies:
+      '@plot/core':
+        specifier: workspace:^
+        version: link:../core
+
+  packages/plugin-mesh:
+    devDependencies:
+      '@plot/core':
+        specifier: workspace:^
+        version: link:../core
 
   packages/render: {}
 

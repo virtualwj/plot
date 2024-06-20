@@ -6,3 +6,4 @@ export function render(el: HTMLCanvasElement, options: GraphOptions){
 export * from "@plot/render"
 export * from "./Graph";
 export * from "./nodes/index";
+export * from "./Plugin";

@@ -1,6 +1,7 @@
 import {EventEmitter} from "../EventEmitter";
 import {Graph} from "../Graph";
 import {NodeAnchors} from "./anchors/NodeAnchors";
+import { type Point} from "@plot/render";
 
 export class Node extends EventEmitter<any>{
   public type = 'node'
@@ -16,6 +17,11 @@ export class Node extends EventEmitter<any>{
   }
   isPointInPath(x:number, y:number){
     return false
+  }
+  get originAnchors(): Array<Point>{
+    return [
+
+    ]
   }
   delete(){
     const deleteIndex = this.graph.nodes.findIndex(node => node === this)

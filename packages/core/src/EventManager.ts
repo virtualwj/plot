@@ -1,5 +1,4 @@
 import {Graph} from "./Graph";
-import {Node} from "./nodes/Node"
 import {Anchor} from "./nodes/anchors/Anchor";
 import {Edge} from "./edges/Edge";
 
@@ -11,8 +10,6 @@ export class EventManager {
     let isDrawingStartAnchor: Anchor | null;
 
     //移动节点
-    let isMovingNode = false;
-    let movingNode: Node | null;
     let isMovingNodeOffsetX = 0;
     let isMovingNodeOffsetY = 0;
 
@@ -39,10 +36,14 @@ export class EventManager {
           if (node.isPointInPath(x, y)) {
             console.log(node)
 
-            isMovingNode = true;
+            graph.isMovingNode = true;
             isMovingNodeOffsetX = x - node.x;
             isMovingNodeOffsetY = y - node.y;
-            movingNode = node
+            graph.movingNode = node
+
+
+            graph.isMovingNode = true;
+            graph.movingNode = node;
             return true
           }
           return false
@@ -51,9 +52,10 @@ export class EventManager {
 
     });
     graph.on('mousemove', ({e, x, y}) => {
-      if (isMovingNode && movingNode) {
-        movingNode.x = x - isMovingNodeOffsetX;
-        movingNode.y = y - isMovingNodeOffsetY;
+      if (graph.isMovingNode && graph.movingNode) {
+        graph.movingNode.x = x - isMovingNodeOffsetX;
+        graph.movingNode.y = y - isMovingNodeOffsetY;
+
         graph.draw();
       }
 
@@ -103,10 +105,11 @@ export class EventManager {
     function reset() {
       isDrawingEdge = false;
       isDrawingStartAnchor = null;
-      isMovingNode = false;
-      movingNode = null;
+      graph.isMovingNode = false;
+      graph.movingNode = null;
       isMovingNodeOffsetX = 0;
       isMovingNodeOffsetY = 0;
+
     }
   }
 }

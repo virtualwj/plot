@@ -1,11 +1,9 @@
-interface DrawOptions {
-  fill?: string;
-  stroke?: string;
-  lineWidth?: number;
-}
+import {DrawElementOptions, DrawFontElementOptions, PointArray} from "../../index";
+
 
 export class CanvasDrawer {
   public ctx: CanvasRenderingContext2D
+
   constructor(public canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     this.clearBlur()
@@ -15,7 +13,7 @@ export class CanvasDrawer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  circle(x: number, y: number, radius: number, options: DrawOptions = {}): void {
+  circle(x: number, y: number, radius: number, options: DrawElementOptions = {}): void {
     const {fill, stroke, lineWidth = 1} = options;
     const ctx = this.ctx;
     ctx.beginPath();
@@ -30,7 +28,7 @@ export class CanvasDrawer {
     ctx.closePath();
   }
 
-  rectangle(x: number, y: number, width: number, height: number, options: DrawOptions = {}): void {
+  rectangle(x: number, y: number, width: number, height: number, options: DrawElementOptions = {}): void {
     const {fill, stroke, lineWidth = 1} = options;
     const ctx = this.ctx;
     ctx.beginPath();
@@ -47,7 +45,7 @@ export class CanvasDrawer {
     ctx.closePath();
   }
 
-  line(x1: number, y1: number, x2: number, y2: number, options: DrawOptions = {}): void {
+  line(x1: number, y1: number, x2: number, y2: number, options: DrawElementOptions = {}): void {
     const {stroke, lineWidth = 1} = options;
     const ctx = this.ctx;
     ctx.beginPath();
@@ -59,7 +57,21 @@ export class CanvasDrawer {
     ctx.closePath();
   }
 
-  clearBlur(){
+  polygon(points: Array<PointArray>) {
+    if (points.length < 2) return; // 确保有足够的点绘制多边形
+    const ctx = this.ctx;
+
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i][0], points[i][1]);
+    }
+    ctx.closePath(); // 关闭路径，形成闭合的多边形
+    ctx.stroke(); // 描边
+    ctx.closePath();
+  }
+
+  clearBlur() {
     // 获取设备像素比
     const dpr = window.devicePixelRatio || 1;
     // 调整Canvas的大小
@@ -77,25 +89,19 @@ export class CanvasDrawer {
     this.ctx.scale(dpr, dpr);
   }
 
-  drawGrid(){
-    // 绘制网格
-    let spacing = 50
-    let dpr = window.devicePixelRatio || 1
-    this.ctx.strokeStyle = '#e0e0e0';
-    this.ctx.lineWidth = 1;
-    // 垂直线
-    for (let x = 0; x <= this.canvas.width / dpr; x += spacing) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, this.canvas.height / dpr);
-      this.ctx.stroke();
-    }
-    // 水平线
-    for (let y = 0; y <= this.canvas.height / dpr; y += spacing) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, y);
-      this.ctx.lineTo(this.canvas.width / dpr, y);
-      this.ctx.stroke();
-    }
+  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions>) {
+    const {font, color, align, baseline} = Object.assign({
+      font: '12px Arial',
+      color: 'black',
+      align: 'left',
+      baseline: 'top'
+    }, options);
+    this.ctx.beginPath();
+    this.ctx.font = font;
+    this.ctx.fillStyle = color;
+    this.ctx.textAlign = align;
+    this.ctx.textBaseline = baseline;
+    this.ctx.fillText(text, x, y);
+    this.ctx.closePath();
   }
 }

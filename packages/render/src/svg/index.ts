@@ -1,8 +1,5 @@
-interface DrawOptions {
-  fill?: string;
-  stroke?: string;
-  lineWidth?: number;
-}
+import {DrawElementOptions, DrawFontElementOptions, PointArray} from "../../index";
+
 
 export class SVGDrawer {
 
@@ -15,7 +12,7 @@ export class SVGDrawer {
     }
   }
 
-  circle(cx: number, cy: number, radius: number, options: DrawOptions = {}): void {
+  circle(cx: number, cy: number, radius: number, options: DrawElementOptions = {}): void {
     const { fill, stroke, lineWidth = 1 } = options;
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', cx.toString());
@@ -28,7 +25,7 @@ export class SVGDrawer {
     this.svg.appendChild(circle);
   }
 
-  rectangle(x: number, y: number, width: number, height: number, options: DrawOptions = {}): void {
+  rectangle(x: number, y: number, width: number, height: number, options: DrawElementOptions = {}): void {
     const { fill, stroke, lineWidth = 1 } = options;
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('x', x.toString());
@@ -41,7 +38,7 @@ export class SVGDrawer {
     this.svg.appendChild(rect);
   }
 
-  line(x1: number, y1: number, x2: number, y2: number, options: DrawOptions = {}): void {
+  line(x1: number, y1: number, x2: number, y2: number, options: DrawElementOptions = {}): void {
     const { stroke, lineWidth = 1 } = options;
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', x1.toString());
@@ -51,5 +48,19 @@ export class SVGDrawer {
       line.setAttribute('stroke', stroke || "#333");
       line.setAttribute('stroke-width', lineWidth.toString() || "1px");
     this.svg.appendChild(line);
+  }
+
+  polygon(points: Array<PointArray>) {
+    //待补充
+  }
+
+  text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions>) {
+    const {font, color, align, baseline} = Object.assign({
+      font: '12px Arial',
+      color: 'black',
+      align: 'left',
+      baseline: 'top'
+    }, options);
+    //待补充
   }
 }
