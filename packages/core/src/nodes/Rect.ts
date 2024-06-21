@@ -1,6 +1,6 @@
 import {Node} from "./Node"
 import {NodeAnchors} from "./anchors/NodeAnchors";
-import {Graph} from "../Graph";
+import {Stage} from "../Stage";
 
 export interface RectOptions {
   x: number,
@@ -15,11 +15,11 @@ export class Rect extends Node {
   public y: number
   public w: number
   public h: number
-  public nodeAnchor : NodeAnchors
+  public nodeAnchor: NodeAnchors
   public type = 'rect'
 
-  constructor(options: RectOptions, public graph: Graph) {
-    super(graph);
+  constructor(options: RectOptions, public stage: Stage) {
+    super(stage);
     this.options = Object.assign({
       y: 100,
       w: 100
@@ -32,10 +32,9 @@ export class Rect extends Node {
   }
 
 
-
   draw() {
     //绘制基础图形
-    this.graph.engine.rectangle(this.x, this.y, this.w, this.h);
+    this.stage.engine.rectangle(this.x, this.y, this.w, this.h);
     //更新锚点
     this.nodeAnchor.update(this.originAnchors);
     //绘制锚点
@@ -46,7 +45,7 @@ export class Rect extends Node {
     return NodeAnchors.toNodeAnchors(this.originAnchors, this);
   }
 
-  get originAnchors(){
+  get originAnchors() {
     return [
       {x: this.x, y: this.y}, // Top-left
       {x: this.x + this.w / 2, y: this.y}, // Top-center

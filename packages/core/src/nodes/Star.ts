@@ -1,6 +1,6 @@
 import {Node} from "./Node"
 import {NodeAnchors} from "./anchors/NodeAnchors";
-import {Graph} from "../Graph";
+import {Stage} from "../Stage";
 
 type Point = [number, number];
 
@@ -12,8 +12,8 @@ export class Star extends Node {
   public y: number
   public initPoint: Array<Point>
 
-  constructor(public points: Array<Point>, public graph: Graph) {
-    super(graph);
+  constructor(public points: Array<Point>, public stage: Stage) {
+    super(stage);
     this.x = points[0][0]
     this.y = points[0][1]
     this.nodeAnchor = this.getAnchors();
@@ -31,7 +31,7 @@ export class Star extends Node {
     })
 
     //绘制基础图形
-    this.graph.engine.polygon(this.points);
+    this.stage.engine.polygon(this.points);
 
     //更新锚点
     this.nodeAnchor.update(this.originAnchors);

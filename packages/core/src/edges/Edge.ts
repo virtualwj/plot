@@ -1,16 +1,16 @@
-import {Graph} from "../Graph";
+import {Stage} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 
 export class Edge {
-  public graph:Graph
+  public stage:Stage
 
   constructor(public startAnchor: Anchor, public endAnchor: Anchor) {
-    this.graph = startAnchor.graph
+    this.stage = startAnchor.stage
   }
 
   draw() {
     //绘制基础图形
-    this.graph.engine.line(this.startAnchor.x, this.startAnchor.y, this.endAnchor.x, this.endAnchor.y);
+    this.stage.engine.line(this.startAnchor.x, this.startAnchor.y, this.endAnchor.x, this.endAnchor.y);
   }
 }
 

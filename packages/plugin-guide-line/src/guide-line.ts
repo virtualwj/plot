@@ -1,4 +1,4 @@
-import {Graph, Node, Point, Plugin, Text} from "@plot/core";
+import {Stage, Node, Point, Plugin, Text} from "@plot/core";
 
 export interface AlignLine {
   start: Point,
@@ -12,15 +12,15 @@ export class GuideLine extends Plugin {
   public active = true
   public el?: HTMLInputElement
 
-  constructor(public graph: Graph) {
-    super(graph)
-    this.graph.on("mousemove", () => {
-      if (this.graph.isMovingNode && this.graph.movingNode) {
-        this.showAlignmentLines(this.graph.movingNode)
+  constructor(public stage: Stage) {
+    super(stage)
+    this.stage.on("mousemove", () => {
+      if (this.stage.isMovingNode && this.stage.movingNode) {
+        this.showAlignmentLines(this.stage.movingNode)
       }
     })
 
-    this.graph.on("mouseup", () => {
+    this.stage.on("mouseup", () => {
       this.alignmentLines = [];
     })
   }
@@ -29,7 +29,7 @@ export class GuideLine extends Plugin {
   draw() {
     // Draw alignment lines
     this.alignmentLines.forEach(line => {
-      this.graph.engine.line(line.start.x, line.start.y, line.end.x, line.end.y, {
+      this.stage.engine.line(line.start.x, line.start.y, line.end.x, line.end.y, {
         stroke: "red"
       })
     });
@@ -38,9 +38,9 @@ export class GuideLine extends Plugin {
   showAlignmentLines(node: Node) {
     this.alignmentLines = [];
     const shapeAnchors: Array<Point> = node.originAnchors;
-    let {width, height} = this.graph.getElementSize();
+    let {width, height} = this.stage.getElementSize();
 
-    this.graph.nodes.forEach(otherNode => {
+    this.stage.nodes.forEach(otherNode => {
       if (otherNode !== node) {
         const otherAnchors = otherNode.originAnchors;
         shapeAnchors.forEach(anchor => {
@@ -61,6 +61,6 @@ export class GuideLine extends Plugin {
         });
       }
     });
-    this.graph.draw();
+    this.stage.draw();
   }
 }

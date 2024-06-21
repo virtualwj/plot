@@ -1,10 +1,10 @@
-import {Graph, GraphOptions} from "./Graph";
+import {Stage, GraphOptions} from "./Stage";
 
 export function render(el: HTMLCanvasElement, options: GraphOptions){
-  return new Graph(el, options)
+  return new Stage(el, options)
 }
 export * from "@plot/render"
-export * from "./Graph";
+export * from "./Stage";
 export * from "./nodes/index";
 export * from "./Plugin";
 export * from "./plugins/index";

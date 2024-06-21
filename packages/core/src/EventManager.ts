@@ -1,4 +1,4 @@
-// import {Graph} from "./Graph";
+// import {Stage} from "./Stage";
 // import {Anchor} from "./nodes/anchors/Anchor";
 // import {Edge} from "./edges/Edge";
 // import {Plugin} from "./Plugin";
@@ -7,8 +7,8 @@
 // export class EventManager extends Plugin{
 //   public name = "EventManager"
 //
-//   constructor(public graph: Graph) {
-//     super(graph);
+//   constructor(public stage: Stage) {
+//     super(stage);
 //     //连线
 //
 //     let isDrawingEdge = false;
@@ -18,12 +18,12 @@
 //     let isMovingNodeOffsetX = 0;
 //     let isMovingNodeOffsetY = 0;
 //
-//     graph.on('mousedown', ({e, x, y}) => {
+//     stage.on('mousedown', ({e, x, y}) => {
 //       if (e && e.button === 2) {
 //         return;
 //       }
 //
-//       graph.nodes.forEach((node, nodeIndex) => {
+//       stage.nodes.forEach((node, nodeIndex) => {
 //         node.emit("mousedown");
 //
 //         node.nodeAnchor.anchors.some((anchor, anchorIndex) => {
@@ -37,18 +37,18 @@
 //       });
 //
 //       if (!isDrawingEdge) {
-//         graph.nodes.some((node, nodeIndex) => {
+//         stage.nodes.some((node, nodeIndex) => {
 //           if (node.isPointInPath(x, y)) {
 //             console.log(node)
 //
-//             graph.isMovingNode = true;
+//             stage.isMovingNode = true;
 //             isMovingNodeOffsetX = x - node.x;
 //             isMovingNodeOffsetY = y - node.y;
-//             graph.movingNode = node
+//             stage.movingNode = node
 //
 //
-//             graph.isMovingNode = true;
-//             graph.movingNode = node;
+//             stage.isMovingNode = true;
+//             stage.movingNode = node;
 //             return true
 //           }
 //           return false
@@ -56,25 +56,25 @@
 //       }
 //
 //     });
-//     graph.on('mousemove', ({e, x, y}) => {
-//       if (graph.isMovingNode && graph.movingNode) {
-//         graph.movingNode.x = x - isMovingNodeOffsetX;
-//         graph.movingNode.y = y - isMovingNodeOffsetY;
+//     stage.on('mousemove', ({e, x, y}) => {
+//       if (stage.isMovingNode && stage.movingNode) {
+//         stage.movingNode.x = x - isMovingNodeOffsetX;
+//         stage.movingNode.y = y - isMovingNodeOffsetY;
 //
-//         graph.draw();
+//         stage.draw();
 //       }
 //
 //       if (isDrawingEdge && isDrawingStartAnchor) {
-//         graph.draw();
-//         this.graph.engine.line(isDrawingStartAnchor.x, isDrawingStartAnchor.y, x, y);
+//         stage.draw();
+//         this.stage.engine.line(isDrawingStartAnchor.x, isDrawingStartAnchor.y, x, y);
 //       }
 //     });
-//     graph.on('mouseup', ({e, x, y}) => {
+//     stage.on('mouseup', ({e, x, y}) => {
 //       if (isDrawingEdge && isDrawingStartAnchor) {
-//         graph.nodes.forEach((node, nodeIndex) => {
+//         stage.nodes.forEach((node, nodeIndex) => {
 //           node.nodeAnchor.anchors.some((anchor, anchorIndex) => {
 //             if (anchor.isPointInPath(x, y)) {
-//               graph.edges.push(new Edge(isDrawingStartAnchor as Anchor, anchor))
+//               stage.edges.push(new Edge(isDrawingStartAnchor as Anchor, anchor))
 //               return true
 //             }
 //             return false
@@ -83,35 +83,35 @@
 //       }
 //
 //       reset()
-//       graph.draw();
+//       stage.draw();
 //     });
-//     graph.on('mouseleave', (e) => {
+//     stage.on('mouseleave', (e) => {
 //       reset()
-//       graph.draw();
+//       stage.draw();
 //     });
-//     graph.on('contextmenu', ({e, x, y}) => {
-//       graph.nodes.some((node, nodeIndex) => {
+//     stage.on('contextmenu', ({e, x, y}) => {
+//       stage.nodes.some((node, nodeIndex) => {
 //         if (node.isPointInPath(x, y)) {
-//           graph.selectedNode = node
+//           stage.selectedNode = node
 //           return true
 //         }
 //         return false
 //       });
 //
-//       if (graph.selectedNode !== null) {
-//         graph.toolbar.style.display = 'block';
-//         graph.toolbar.style.left = `${e.pageX}px`;
-//         graph.toolbar.style.top = `${e.pageY}px`;
+//       if (stage.selectedNode !== null) {
+//         stage.toolbar.style.display = 'block';
+//         stage.toolbar.style.left = `${e.pageX}px`;
+//         stage.toolbar.style.top = `${e.pageY}px`;
 //       } else {
-//         graph.selectedNode = null
+//         stage.selectedNode = null
 //       }
 //     });
 //
 //     function reset() {
 //       isDrawingEdge = false;
 //       isDrawingStartAnchor = null;
-//       graph.isMovingNode = false;
-//       graph.movingNode = null;
+//       stage.isMovingNode = false;
+//       stage.movingNode = null;
 //       isMovingNodeOffsetX = 0;
 //       isMovingNodeOffsetY = 0;
 //

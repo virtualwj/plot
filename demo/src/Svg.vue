@@ -11,37 +11,37 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Graph, render, Rect, Circle} from "@plot/core"
+import {Stage, render, Rect, Circle} from "@plot/core"
 import {GuideLine} from "@plot/plugin-guide-line";
-let graph: Graph
+let stage: Stage
 function addSquare(){
-    graph.addNode(new Rect({
+    stage.addNode(new Rect({
         x: 100,
         y: 100,
         w: 100,
         h: 100,
-    }, graph))
+    }, stage))
 }
 function addCircle() {
-    graph.addNode(new Circle({
+    stage.addNode(new Circle({
         x: 300,
         y: 100,
         r: 50,
-    }, graph))
+    }, stage))
 }
 
 function deleteShape() {
-    graph.deleteNode()
+    stage.deleteNode()
 }
 
 function deleteNode() {
-    graph.deleteNode()
+    stage.deleteNode()
 }
 
 const container = ref<HTMLCanvasElement>();
 const toolbar = ref<HTMLDivElement>();
 onMounted(() => {
-    graph = render(container.value as HTMLCanvasElement, {
+    stage = render(container.value as HTMLCanvasElement, {
         toolbar: toolbar.value as HTMLDivElement,
         engine: "svg",
         plugin: [GuideLine]

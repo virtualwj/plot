@@ -1,4 +1,4 @@
-import {Graph, GraphMode} from "../Graph";
+import {Stage, GraphMode} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
@@ -9,65 +9,65 @@ export class Drag extends Plugin {
   public activeMode: Array<GraphMode> = ["drag"]
   static priority = 10
 
-  constructor(public graph: Graph) {
-    super(graph);
+  constructor(public stage: Stage) {
+    super(stage);
 
     //移动节点
     let isMovingNodeOffsetX = 0;
     let isMovingNodeOffsetY = 0;
 
-    graph.on('mousedown', ({e, x, y}) => {
+    stage.on('mousedown', ({e, x, y}) => {
       console.log(Drag.priority, Drag)
-      if (!this.active || graph.isAddingEdge) {
+      if (!this.active || stage.isAddingEdge) {
         return
       }
-      graph.nodes.some((node, nodeIndex) => {
+      stage.nodes.some((node, nodeIndex) => {
         if (node.isPointInPath(x, y)) {
           console.log(node)
 
-          graph.isMovingNode = true;
+          stage.isMovingNode = true;
           isMovingNodeOffsetX = x - node.x;
           isMovingNodeOffsetY = y - node.y;
-          graph.movingNode = node
+          stage.movingNode = node
 
-          graph.isMovingNode = true;
-          graph.movingNode = node;
+          stage.isMovingNode = true;
+          stage.movingNode = node;
           return true
         }
         return false
       });
     });
-    graph.on('mousemove', ({e, x, y}) => {
-      if (!this.active && !graph.isAddingEdge) {
+    stage.on('mousemove', ({e, x, y}) => {
+      if (!this.active && !stage.isAddingEdge) {
         reset();
         return
       }
-      if (graph.isMovingNode && graph.movingNode) {
-        graph.movingNode.x = x - isMovingNodeOffsetX;
-        graph.movingNode.y = y - isMovingNodeOffsetY;
-        graph.draw();
+      if (stage.isMovingNode && stage.movingNode) {
+        stage.movingNode.x = x - isMovingNodeOffsetX;
+        stage.movingNode.y = y - isMovingNodeOffsetY;
+        stage.draw();
       }
     });
 
-    graph.on('mouseleave', (e) => {
+    stage.on('mouseleave', (e) => {
       if (!this.active) {
         return
       }
       reset()
-      graph.draw();
+      stage.draw();
     });
 
-    graph.on('mouseup', ({e, x, y}) => {
+    stage.on('mouseup', ({e, x, y}) => {
       if (!this.active) {
         return
       }
       reset()
-      graph.draw();
+      stage.draw();
     });
 
     function reset() {
-      graph.isMovingNode = false;
-      graph.movingNode = null;
+      stage.isMovingNode = false;
+      stage.movingNode = null;
       isMovingNodeOffsetX = 0;
       isMovingNodeOffsetY = 0;
     }

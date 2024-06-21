@@ -6,8 +6,9 @@ import {Anchor} from "./nodes/anchors/Anchor";
 // import {EventManager} from "./EventManager";
 import {Plugin} from "./Plugin";
 import {Drag, Painter, TextPainter, LineShape} from "./plugins";
+import Animate from "./animate/tween/Animate";
 
-// 声明 Graph 类
+// 声明 Stage 类
 export interface GraphOptions {
   engine: "svg" | "canvas",
   toolbar: HTMLDivElement,
@@ -25,13 +26,14 @@ export interface GraphEvent {
   dblclick: { e: MouseEvent, x: number, y: number },
   wheel: { e: MouseEvent, x: number, y: number },
   click: { e: MouseEvent, x: number, y: number },
+  animationEnd: { stage:Stage},
 }
 
 
 /**
- * Graph 类
+ * Stage 类
  */
-export class Graph extends EventEmitter<GraphEvent> {
+export class Stage extends EventEmitter<GraphEvent> {
   nodes: Array<Node>
   edges: Array<Edge>
   engine: CanvasDrawer | SVGDrawer
@@ -48,6 +50,8 @@ export class Graph extends EventEmitter<GraphEvent> {
 
   //被选中的Node
   selectedNode!: null | Node
+
+  animate!:Animate
 
   constructor(public element: HTMLCanvasElement | SVGSVGElement, public options: GraphOptions) {
     super()
@@ -68,13 +72,13 @@ export class Graph extends EventEmitter<GraphEvent> {
     this.options.plugin = [LineShape, Drag, Painter,TextPainter,].concat(this.options.plugin || []);
     this.options.plugin = sortArrayDescending(this.options.plugin, "priority")
     this.plugin = this.options.plugin!.map(plugin => {
-      console.log(plugin)
       return new plugin(this);
     })
 
     this.bindEvent()
     // this.eventManager = new EventManager(this);
     this.mode = this.__mode;
+    this.animate = new Animate(this)
     console.log(this)
   }
 
@@ -84,11 +88,13 @@ export class Graph extends EventEmitter<GraphEvent> {
   addNode(node: Node) {
     this.nodes.push(node);
     this.draw();
+    return this;
   }
 
   addEdge(edge: Edge) {
     this.edges.push(edge);
     this.draw();
+    return this;
   }
 
   deleteNode() {
@@ -97,6 +103,7 @@ export class Graph extends EventEmitter<GraphEvent> {
       this.draw()
       this.hideToolbar()
     }
+    return this;
   }
 
   get mode() {
@@ -150,6 +157,7 @@ export class Graph extends EventEmitter<GraphEvent> {
     this.plugin.forEach(plugin => {
       plugin.draw();
     })
+    return this;
   }
 
 

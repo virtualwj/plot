@@ -1,4 +1,4 @@
-import {Graph, GraphMode} from "../Graph";
+import {Stage, GraphMode} from "../Stage";
 import {Plugin} from "../Plugin";
 import {Rect, Node} from "../nodes";
 
@@ -13,11 +13,11 @@ export class Painter extends Plugin {
   public activeMode: Array<GraphMode> = ["painter"]
   static priority = 10
 
-  constructor(public graph: Graph, public options?: any) {
-    super(graph);
+  constructor(public stage: Stage, public options?: any) {
+    super(stage);
 
     // 鼠标按下事件
-    this.graph.on('mousedown', ({e, x, y}) => {
+    this.stage.on('mousedown', ({e, x, y}) => {
       console.log(Painter.priority, Painter)
 
       if(!this.active) {
@@ -30,11 +30,11 @@ export class Painter extends Plugin {
         y: y,
         w: 0,
         h: 0,
-      }, graph);
+      }, stage);
     });
 
     // 鼠标移动事件
-    this.graph.on('mousemove', ({e, x, y}) => {
+    this.stage.on('mousemove', ({e, x, y}) => {
       if(!this.active) {
         return
       }
@@ -45,22 +45,23 @@ export class Painter extends Plugin {
         this.isDrawingNode.w = x - this.startX;
         //@ts-ignore
         this.isDrawingNode.h = y - this.startY;
-        this.graph.draw()
+        this.stage.draw()
       }
     });
 
     // 鼠标移动事件
-    this.graph.on('mouseup', ({e, x, y}) => {
+    this.stage.on('mouseup', ({e, x, y}) => {
       if(!this.active) {
         return
       }
 
-      if (this.isDrawingNode && this.isDrawingNode.w > 1) {
-        this.graph.addNode(this.isDrawingNode)
+      if (this.isDrawingNode && this.isDrawingNode.w > 2) {
+        this.stage.addNode(this.isDrawingNode)
       }
       this.isDrawingNode = null;
       this.startX = 0;
       this.startY = 0;
+      this.draw()
     });
   }
 

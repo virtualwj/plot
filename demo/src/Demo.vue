@@ -18,67 +18,74 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Graph, render, Rect, Circle, Polygon} from "@plot/core"
+import {Stage, render, Rect, Circle, Polygon} from "@plot/core"
 import {GuideLine} from "@plot/plugin-guide-line";
-let graph: Graph
+let stage: Stage
 function addSquare(){
-    graph.addNode(new Rect({
+    stage.addNode(new Rect({
         x: 100,
         y: 100,
         w: 100,
         h: 100,
-    }, graph))
+    }, stage))
 }
 function addCircle() {
-    graph.addNode(new Circle({
+    stage.addNode(new Circle({
         x: 300,
         y: 100,
         r: 50,
-    }, graph))
+        drawOptions: {
+            fill: "green",
+            stroke: "orange"
+        }
+    }, stage).animateTo( {r: 200}, {duration: 2000}))
 }
 
 function deleteShape() {
-    graph.deleteNode()
+    stage.deleteNode()
 }
 
 function deleteNode() {
-    graph.deleteNode()
+    stage.deleteNode()
 }
 
 function dragMode() {
-    graph.mode = 'drag'
+    stage.mode = 'drag'
 }
 function painterMode() {
-    graph.mode = 'painter'
+    stage.mode = 'painter'
 }
 
 function addPolygon(){
-    graph.addNode(new Polygon([
+    stage.addNode(new Polygon([
         [400, 150],
         [500, 50],
         [600, 150],
         [550, 250],
         [450, 250]
-    ], graph))
+    ], stage))
 }
 
 function addStar(){
-    graph.addNode(new Polygon([
+    stage.addNode(new Polygon([
         [400, 150],
         [500, 50],
         [600, 150],
         [550, 250],
         [450, 250]
-    ], graph))
+    ], stage))
 }
 
 const container = ref<HTMLCanvasElement>();
 const toolbar = ref<HTMLDivElement>();
 onMounted(() => {
-    graph = render(container.value as HTMLCanvasElement, {
+    stage = render(container.value as HTMLCanvasElement, {
         toolbar: toolbar.value as HTMLDivElement,
         engine: "canvas",
         plugin: [GuideLine]
+    })
+    stage.on("animationEnd", () => {
+        console.log("end")
     })
     addSquare()
     addCircle()

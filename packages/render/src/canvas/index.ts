@@ -71,6 +71,24 @@ export class CanvasDrawer {
     ctx.closePath();
   }
 
+  //圆的中心的 x 坐标。
+  // y	圆的中心的 y 坐标。
+  // r	圆的半径。
+  // sAngle	起始角，以弧度计。（弧的圆形的三点钟位置是 0 度）。
+  // eAngle	结束角，以弧度计。
+  // counterclockwise	可选。规定应该逆时针还是顺时针绘图。False = 顺时针，true = 逆时针。
+  arc(x: number, y: number, r: number, sAngle: number, eAngle: number, counterclockwise: boolean,  options: DrawElementOptions = {}) {
+    const ctx = this.ctx;
+    const {stroke, lineWidth = 1} = options;
+
+    ctx.beginPath();
+    ctx.arc(x,y,r,sAngle,eAngle,counterclockwise);
+    ctx.strokeStyle = stroke || "#333";
+    ctx.lineWidth = lineWidth || 1;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
   clearBlur() {
     // 获取设备像素比
     const dpr = window.devicePixelRatio || 1;

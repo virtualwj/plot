@@ -1,11 +1,13 @@
 import {Node} from "./Node"
 import {NodeAnchors} from "./anchors/NodeAnchors";
-import {Graph} from "../Graph";
+import {Stage} from "../Stage";
+import {DrawElementOptions} from "@plot/render";
 
 export interface CircleOptions {
   x: number,
   y: number,
   r: number,
+  drawOptions?: Partial<DrawElementOptions>,
 }
 
 export class Circle extends Node {
@@ -15,24 +17,36 @@ export class Circle extends Node {
   public r: number
   public nodeAnchor: NodeAnchors
   public type = 'circle'
+  public drawOptions: DrawElementOptions
 
 
-  constructor(options: CircleOptions, public graph: Graph) {
-    super(graph);
+  constructor(options: CircleOptions, public stage: Stage) {
+    super(stage);
     this.options = Object.assign({
       y: 100,
-      w: 100
+      w: 100,
+      drawOptions: {}
     }, options)
     this.x = this.options.x;
     this.y = this.options.y;
     this.r = this.options.r;
     this.nodeAnchor = this.getAnchors();
-
+    this.drawOptions = this.options.drawOptions as Partial<DrawElementOptions>;
+    this.stage.animate.addTween(this, {
+      from: {r: this.options.r},
+      to: {r: this.options.r + 100},
+      duration: 1000,
+      onUpdate:(t, k) => {
+        this.r = k.r
+        console.log(k.r)
+        this.stage.draw()
+      }
+    })
   }
 
   draw() {
     //绘制基础图形
-    this.graph.engine.circle(this.x, this.y, this.r);
+    this.stage.engine.circle(this.x, this.y, this.r, this.drawOptions);
     //更新锚点
     this.nodeAnchor.update(this.originAnchors);
 

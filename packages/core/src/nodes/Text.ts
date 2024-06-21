@@ -1,6 +1,6 @@
 import {Node} from "./Node"
 import {NodeAnchors} from "./anchors/NodeAnchors";
-import {Graph} from "../Graph";
+import {Stage} from "../Stage";
 
 export interface TextOptions {
   x: number,
@@ -21,8 +21,8 @@ export class Text extends Node {
   public fontSize= "30px"
   public padding= 5
 
-  constructor(options: TextOptions, public graph: Graph) {
-    super(graph);
+  constructor(options: TextOptions, public stage: Stage) {
+    super(stage);
     this.nodeAnchor = this.getAnchors();
     this.x = options.x - this.padding;
     this.y = options.y - this.padding;
@@ -34,7 +34,7 @@ export class Text extends Node {
 
   draw() {
     //绘制基础图形
-    this.graph.engine.text(this.text, this.x +  + this.padding, this.y +  + this.padding, {
+    this.stage.engine.text(this.text, this.x +  + this.padding, this.y +  + this.padding, {
       font: this.fontSize + "Arial"
     });
     //更新锚点

@@ -1,4 +1,4 @@
-import {Graph, GraphMode} from "../Graph";
+import {Stage, GraphMode} from "../Stage";
 import {Plugin} from "../Plugin";
 import {Text} from "../nodes/Text";
 
@@ -9,9 +9,9 @@ export class TextPainter extends Plugin {
   public activeMode: Array<GraphMode> = ["painter"]
   static priority = 10
 
-  constructor(public graph: Graph) {
-    super(graph);
-    this.graph.on("dblclick", ({e, x, y}) => {
+  constructor(public stage: Stage) {
+    super(stage);
+    this.stage.on("dblclick", ({e, x, y}) => {
       if(!this.active) {
         return
       }
@@ -19,7 +19,7 @@ export class TextPainter extends Plugin {
       this.el = this.createInput(e.clientX, e.clientY, x, y)
     })
 
-    this.graph.on("click", ({e}) => {
+    this.stage.on("click", ({e}) => {
       if(!this.active) {
         return
       }
@@ -40,21 +40,21 @@ export class TextPainter extends Plugin {
     input.style.border = "none"
     input.style.lineHeight = "36px"
     input.style.outline = "none"
-    input.style.background = "background"
+    input.style.background = "transparent"
     // 设置 input 元素的位置
     input.style.left = `${x}px`;
     input.style.top = `${y}px`;
     input.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
-        var {w,h} = this.graph.engine.getTextBounding(input.value, 30);
+        var {w,h} = this.stage.engine.getTextBounding(input.value, 30);
 
-        this.graph.addNode(new Text({
+        this.stage.addNode(new Text({
           x: offsetX,
           y: offsetY,
           w: w ,
           h: h ,
           text: input.value
-        }, this.graph))
+        }, this.stage))
 
         this.el.remove();
       }

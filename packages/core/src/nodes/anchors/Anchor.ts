@@ -1,5 +1,5 @@
 import {Node} from "../Node";
-import {Graph} from "../../Graph";
+import {Stage} from "../../Stage";
 import {Edge} from "../../edges/Edge";
 
 export interface AnchorOptions {
@@ -8,20 +8,20 @@ export interface AnchorOptions {
 }
 
 export class Anchor extends Node {
-  public anchorSize = 24;
+  public anchorSize = 4;
   public x: number;
   public y: number;
-  public graph: Graph;
+  public stage: Stage;
 
   constructor(public options: AnchorOptions, private parent: Node) {
-    super(parent.graph);
+    super(parent.stage);
     this.x = options.x;
     this.y = options.y;
-    this.graph = parent.graph;
+    this.stage = parent.stage;
   }
 
   draw() {
-    this.parent.graph.engine.circle(this.x, this.y, this.anchorSize, {
+    this.parent.stage.engine.circle(this.x, this.y, this.anchorSize, {
       fill: "blue"
     })
   }

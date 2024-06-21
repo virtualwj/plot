@@ -1,4 +1,4 @@
-import {Graph, GraphMode} from "../Graph";
+import {Stage, GraphMode} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
@@ -9,47 +9,47 @@ export class LineShape extends Plugin{
   public activeMode: Array<GraphMode> = ["drag"]
   static priority = 20
 
-  constructor(public graph: Graph) {
-    super(graph);
+  constructor(public stage: Stage) {
+    super(stage);
     //连线
-    graph.on('mousedown', ({e, x, y}) => {
+    stage.on('mousedown', ({e, x, y}) => {
       console.log(LineShape.priority, LineShape)
 
       if(!this.active) {
         return
       }
 
-      graph.nodes.forEach((node, nodeIndex) => {
+      stage.nodes.forEach((node, nodeIndex) => {
         node.nodeAnchor.anchors.some((anchor, anchorIndex) => {
           if (anchor.isPointInPath(x, y)) {
-            graph.isAddingEdge = true;
-            graph.isAddingStartAnchor = anchor;
+            stage.isAddingEdge = true;
+            stage.isAddingStartAnchor = anchor;
             return true
           }
           return false
         });
       });
     });
-    graph.on('mousemove', ({e, x, y}) => {
+    stage.on('mousemove', ({e, x, y}) => {
       if(!this.active) {
         return
       }
 
-      if (graph.isAddingEdge && graph.isAddingStartAnchor) {
-        graph.draw();
-        this.graph.engine.line(graph.isAddingStartAnchor.x, graph.isAddingStartAnchor.y, x, y);
+      if (stage.isAddingEdge && stage.isAddingStartAnchor) {
+        stage.draw();
+        this.stage.engine.line(stage.isAddingStartAnchor.x, stage.isAddingStartAnchor.y, x, y);
       }
     });
-    graph.on('mouseup', ({e, x, y}) => {
+    stage.on('mouseup', ({e, x, y}) => {
       if(!this.active) {
         return
       }
 
-      if (graph.isAddingEdge && graph.isAddingStartAnchor) {
-        graph.nodes.forEach((node, nodeIndex) => {
+      if (stage.isAddingEdge && stage.isAddingStartAnchor) {
+        stage.nodes.forEach((node, nodeIndex) => {
           node.nodeAnchor.anchors.some((anchor, anchorIndex) => {
             if (anchor.isPointInPath(x, y)) {
-              graph.edges.push(new Edge(graph.isAddingStartAnchor as Anchor, anchor))
+              stage.edges.push(new Edge(stage.isAddingStartAnchor as Anchor, anchor))
               return true
             }
             return false
@@ -57,20 +57,20 @@ export class LineShape extends Plugin{
         });
       }
       reset()
-      graph.draw();
+      stage.draw();
     });
-    graph.on('mouseleave', (e) => {
+    stage.on('mouseleave', (e) => {
       if(!this.active) {
         return
       }
 
       reset()
-      graph.draw();
+      stage.draw();
     });
 
     function reset() {
-      graph.isAddingEdge = false;
-      graph.isAddingStartAnchor = null;
+      stage.isAddingEdge = false;
+      stage.isAddingStartAnchor = null;
     }
   }
 }
