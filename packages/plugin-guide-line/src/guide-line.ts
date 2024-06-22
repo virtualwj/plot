@@ -1,4 +1,4 @@
-import {Stage, Node, Point, Plugin, Text} from "@plot/core";
+import {Stage, Node, Point, Plugin, AddText} from "@plot/core";
 
 export interface AlignLine {
   start: Point,

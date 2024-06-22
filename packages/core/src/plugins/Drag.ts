@@ -17,13 +17,12 @@ export class Drag extends Plugin {
     let isMovingNodeOffsetY = 0;
 
     stage.on('mousedown', ({e, x, y}) => {
-      console.log(Drag.priority, Drag)
       if (!this.active || stage.isAddingEdge) {
         return
       }
-      stage.nodes.some((node, nodeIndex) => {
+      for (let i = stage.nodes.length - 1; i >= 0; i--) {
+        const node = stage.nodes[i]
         if (node.isPointInPath(x, y)) {
-          console.log(node)
 
           stage.isMovingNode = true;
           isMovingNodeOffsetX = x - node.x;
@@ -32,10 +31,9 @@ export class Drag extends Plugin {
 
           stage.isMovingNode = true;
           stage.movingNode = node;
-          return true
+          break;
         }
-        return false
-      });
+      }
     });
     stage.on('mousemove', ({e, x, y}) => {
       if (!this.active && !stage.isAddingEdge) {

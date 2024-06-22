@@ -5,10 +5,8 @@
         <button @click="addPolygon">Add Polygon</button>
         <button @click="addPolygon">Add Star</button>
 
-        <button @click="mode('drag')">Drag</button>
-        <button @click="mode('painter')">Painter</button>
-        <button @click="mode('text')">Text</button>
-        <button @click="mode('pencil')">Pencil</button>
+        <button @click="dragMode">Drag</button>
+        <button @click="painterMode">Painter</button>
 
         <button @click="deleteNode">删除第一个</button>
     </div>
@@ -28,11 +26,7 @@ function addSquare(){
         x: 100,
         y: 100,
         w: 100,
-        h: 100,
-        zIndex: 10,
-        drawOptions: {
-            fill: "red"
-        }
+        h: 100
     }, stage))
 }
 function addCircle() {
@@ -40,12 +34,11 @@ function addCircle() {
         x: 300,
         y: 100,
         r: 50,
-        anchor: false,
         drawOptions: {
             fill: "green",
             stroke: "orange"
         }
-    }, stage))
+    }, stage).animateTo( {r: 200}, {duration: 2000}))
 }
 
 function deleteShape() {
@@ -56,8 +49,11 @@ function deleteNode() {
     stage.deleteNode()
 }
 
-function mode(m) {
-    stage.mode = m
+function dragMode() {
+    stage.mode = 'drag'
+}
+function painterMode() {
+    stage.mode = 'painter'
 }
 
 function addPolygon(){
@@ -88,12 +84,56 @@ onMounted(() => {
         engine: "canvas",
         plugin: [GuideLine]
     })
+    const w = 800;
+    const h = 600;
+
     stage.on("animationEnd", () => {
         console.log("end")
     })
-    addSquare()
-    addCircle()
-    addPolygon()
+    function createCircle() {
+        var color = 'rgba('+Math.round(Math.random()*255)+', '+Math.round(Math.random()*255)+', '+Math.round(Math.random()*255)+', ' + Math.random() * 1 + ')'
+
+        var circle = new Circle({
+            x: w / 2,
+            y: h / 2,
+            r: 0,
+            anchor: false,
+            drawOptions: {
+                fill: color,
+                stroke: "transparent"
+            }
+        }, stage);
+        circle.open = false
+        stage.addNode(circle);
+        console.log(circle)
+    }
+
+    for(var i = 0; i < 200; i ++) {
+        createCircle();
+    }
+
+    function animation() {
+        stage.nodes.forEach(function(graph, i) {
+            graph.animateTo({
+                x: graph.open ? w / 2 : Math.random() * w,
+                y: graph.open ? h / 2 : Math.random() * h,
+                r: graph.open ? 0 : Math.random() * 10 + 5
+
+            }, {
+                easing: 'quartOut',
+                onFinish: function() {
+                    graph.open = !graph.open;
+                },
+                duration: 500,
+            });
+        });
+    }
+
+    animation();
+
+    stage.on("animationEnd", function() {
+        setTimeout(animation, 50);
+    })
 })
 </script>
 

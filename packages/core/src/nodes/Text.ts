@@ -37,10 +37,7 @@ export class Text extends Node {
     this.stage.engine.text(this.text, this.x +  + this.padding, this.y +  + this.padding, {
       font: this.fontSize + "Arial"
     });
-    //更新锚点
-    this.nodeAnchor.update(this.originAnchors);
-    //绘制锚点
-    this.nodeAnchor.draw();
+    super.draw();
   }
 
   getAnchors() {

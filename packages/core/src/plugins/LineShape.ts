@@ -13,8 +13,6 @@ export class LineShape extends Plugin{
     super(stage);
     //连线
     stage.on('mousedown', ({e, x, y}) => {
-      console.log(LineShape.priority, LineShape)
-
       if(!this.active) {
         return
       }

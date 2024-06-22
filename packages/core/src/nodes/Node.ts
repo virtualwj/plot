@@ -4,9 +4,15 @@ import {NodeAnchors} from "./anchors/NodeAnchors";
 import {type Point} from "@plot/render";
 import {TweenSettings} from "../animate";
 
-export class Node extends EventEmitter<any> {
-  public type = 'node'
+export interface NodeOptions {
+  anchor?: boolean
+  zIndex?:number
+}
 
+export abstract class Node extends EventEmitter<any> {
+  public type = 'node'
+  public anchor: boolean = true
+  public zIndex: number = 0
   nodeAnchor!: NodeAnchors
   //x,y图形参照坐标
   x!: number
@@ -18,6 +24,12 @@ export class Node extends EventEmitter<any> {
   }
 
   draw() {
+    //更新锚点
+    if (this.nodeAnchor) {
+      this.nodeAnchor.update(this.originAnchors);
+      //绘制锚点
+      this.nodeAnchor.draw();
+    }
   }
 
   isPointInPath(x: number, y: number) {
@@ -33,7 +45,12 @@ export class Node extends EventEmitter<any> {
     this.stage.animate.addTween(this, Object.assign({
       from: from,
       to: to,
-      duration: 1000
+      duration: 1000,
+      onUpdate: (element: any, config: any) => {
+        for (let property in config) {
+          element[property] = config[property]
+        }
+      }
     }, config))
     return this;
   }

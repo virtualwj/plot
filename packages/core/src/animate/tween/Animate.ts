@@ -10,7 +10,6 @@ export default class Animate {
   }
 
   addTween(target: any, settings: Partial<TweenSettings>) {
-
     this.jobs.push((now: number) => {
       const tween = new Tween(target, settings);
       this.tweens.push(tween);
@@ -42,6 +41,8 @@ export default class Animate {
       const t = (now - tween.start) / (tween.end - tween.start);
 
       tween.tick((t < 1) ? t : 1);
+
+      this.stage.draw()
 
       if (tween.finished) {
         this.tweens.splice(i--, 1);

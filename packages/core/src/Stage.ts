@@ -1,11 +1,10 @@
-import {SVGDrawer, CanvasDrawer, sortArrayDescending} from "@plot/render";
-import {Node} from "./nodes/Node";
+import {SVGDrawer, CanvasDrawer, sortArrayDescending, sortArrayAscending} from "@plot/render";
+import {Node} from "./nodes";
 import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";
 import {Anchor} from "./nodes/anchors/Anchor";
-// import {EventManager} from "./EventManager";
 import {Plugin} from "./Plugin";
-import {Drag, Painter, TextPainter, LineShape} from "./plugins";
+import {Drag, Painter, AddText, LineShape} from "./plugins";
 import Animate from "./animate/tween/Animate";
 
 // 声明 Stage 类
@@ -15,7 +14,7 @@ export interface GraphOptions {
   plugin?: Array<typeof Plugin>
 }
 
-export type GraphMode = "drag" | "painter"
+export type GraphMode = "drag" | "painter" | "pencil" | "text"
 
 export interface GraphEvent {
   mousedown: { e: MouseEvent, x: number, y: number },
@@ -26,7 +25,8 @@ export interface GraphEvent {
   dblclick: { e: MouseEvent, x: number, y: number },
   wheel: { e: MouseEvent, x: number, y: number },
   click: { e: MouseEvent, x: number, y: number },
-  animationEnd: { stage:Stage},
+  animationEnd: { stage: Stage },
+  modeChange: { mode: GraphMode },
 }
 
 
@@ -51,7 +51,7 @@ export class Stage extends EventEmitter<GraphEvent> {
   //被选中的Node
   selectedNode!: null | Node
 
-  animate!:Animate
+  animate!: Animate
 
   constructor(public element: HTMLCanvasElement | SVGSVGElement, public options: GraphOptions) {
     super()
@@ -69,8 +69,8 @@ export class Stage extends EventEmitter<GraphEvent> {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
 
-    this.options.plugin = [LineShape, Drag, Painter,TextPainter,].concat(this.options.plugin || []);
-    this.options.plugin = sortArrayDescending(this.options.plugin, "priority")
+    this.options.plugin = this.options.plugin?.concat([LineShape, Drag, Painter, AddText]);
+    this.options.plugin = sortArrayDescending(this.options.plugin || [], "priority")
     this.plugin = this.options.plugin!.map(plugin => {
       return new plugin(this);
     })
@@ -79,14 +79,30 @@ export class Stage extends EventEmitter<GraphEvent> {
     // this.eventManager = new EventManager(this);
     this.mode = this.__mode;
     this.animate = new Animate(this)
-    console.log(this)
+    console.log(window.stage = this)
   }
 
   /**
    * 添加一个节点
    */
   addNode(node: Node) {
-    this.nodes.push(node);
+    //添加的位置
+    let addIndex = this.nodes.length
+    for (let i = 0; i < this.nodes.length; i++) {
+      const el = this.nodes[i]
+      if (node.zIndex < el.zIndex) {
+        addIndex = i || 0;
+        break;
+      }
+
+      if (node.zIndex >= el.zIndex && i === this.nodes.length - 1) {
+        addIndex = i + 1
+        break
+      }
+    }
+    console.log(this.nodes.length, addIndex)
+    this.nodes.splice(addIndex, 0, node);
+    console.log(this.nodes)
     this.draw();
     return this;
   }
@@ -115,6 +131,11 @@ export class Stage extends EventEmitter<GraphEvent> {
     this.plugin.forEach(plugin => {
       plugin.modeChanged(mode);
     })
+    this.emit("modeChange", {mode})
+  }
+
+  defaultMode() {
+    this.mode = "drag";
   }
 
   getElementSize() {

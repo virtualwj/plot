@@ -1,7 +1,8 @@
 import {Stage} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
+import {Pointer} from "./Pointer";
 
-export class Edge {
+export class Edge{
   public stage:Stage
 
   constructor(public startAnchor: Anchor, public endAnchor: Anchor) {

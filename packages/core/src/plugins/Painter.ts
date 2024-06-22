@@ -18,7 +18,6 @@ export class Painter extends Plugin {
 
     // 鼠标按下事件
     this.stage.on('mousedown', ({e, x, y}) => {
-      console.log(Painter.priority, Painter)
 
       if(!this.active) {
         return
@@ -57,6 +56,7 @@ export class Painter extends Plugin {
 
       if (this.isDrawingNode && this.isDrawingNode.w > 2) {
         this.stage.addNode(this.isDrawingNode)
+        stage.defaultMode()
       }
       this.isDrawingNode = null;
       this.startX = 0;

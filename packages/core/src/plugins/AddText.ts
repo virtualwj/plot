@@ -2,30 +2,21 @@ import {Stage, GraphMode} from "../Stage";
 import {Plugin} from "../Plugin";
 import {Text} from "../nodes/Text";
 
-export class TextPainter extends Plugin {
+export class AddText extends Plugin {
   public fontSize= "30px";
   public el!: HTMLInputElement;
   public name = 'TextPainter'
-  public activeMode: Array<GraphMode> = ["painter"]
+  public activeMode: Array<GraphMode> = ["text"]
   static priority = 10
 
   constructor(public stage: Stage) {
     super(stage);
-    this.stage.on("dblclick", ({e, x, y}) => {
+    this.stage.on("click", ({e, x, y}) => {
       if(!this.active) {
         return
       }
 
       this.el = this.createInput(e.clientX, e.clientY, x, y)
-    })
-
-    this.stage.on("click", ({e}) => {
-      if(!this.active) {
-        return
-      }
-
-      console.log("双击", e.clientX, e.clientY)
-      this.el?.remove();
     })
   }
 
@@ -57,6 +48,7 @@ export class TextPainter extends Plugin {
         }, this.stage))
 
         this.el.remove();
+        this.stage.defaultMode()
       }
     });
 

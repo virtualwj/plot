@@ -22,7 +22,6 @@ export class Polygon extends Node {
     })
   }
 
-
   draw() {
     //更新Points
     this.points.forEach((point, index) => {
@@ -33,11 +32,7 @@ export class Polygon extends Node {
     //绘制基础图形
     this.stage.engine.polygon(this.points);
 
-    //更新锚点
-    this.nodeAnchor.update(this.originAnchors);
-
-    //绘制锚点
-    this.nodeAnchor.draw();
+    super.draw()
   }
 
   getAnchors() {

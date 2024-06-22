@@ -2,6 +2,7 @@ interface Point {
   x: number
   y: number
 }
+
 //计算多边形的外接矩形
 export function calculatePolygonBoundingBox(vertices: Array<Point>) {
   let minX = Infinity, minY = Infinity;
@@ -16,6 +17,7 @@ export function calculatePolygonBoundingBox(vertices: Array<Point>) {
 
   return {minX, minY, maxX, maxY};
 }
+
 //计算圆的外接矩形
 export function calculateCircleBoundingBox(center: Point, radius: number) {
   return {
@@ -27,6 +29,11 @@ export function calculateCircleBoundingBox(center: Point, radius: number) {
 }
 
 // 定义排序函数
-export function sortArrayDescending(arr:Array<any>, key:string) {
+export function sortArrayDescending(arr: Array<any>, key: string) {
   return arr.sort((a, b) => b[key] - a[key]);
+}
+
+// 定义排序函数
+export function sortArrayAscending(arr: Array<any>, key: string) {
+  return arr.sort((a, b) => a[key] - b[key]);
 }

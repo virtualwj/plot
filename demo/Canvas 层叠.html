@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Layering</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/3.1.0/rough.js" integrity="sha512-uBOveTyeyZeNHM6M/x8BxnMBZ0cFeYctySKL0oG/dG3xw0kX606+pzKaIX2p9ZxetQIDD2ieqAZPS2wITZ+jRw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+<!-- Background canvas -->
+<canvas id="backgroundCanvas" width="800" height="600" style="z-index: 1;"></canvas>
+<!-- Foreground canvas -->
+<canvas id="foregroundCanvas" width="800" height="600" style="z-index: 2;"></canvas>
+<script>
+    const backgroundCanvas = document.getElementById('backgroundCanvas');
+    const foregroundCanvas = document.getElementById('foregroundCanvas');
+
+    const backgroundCtx = backgroundCanvas.getContext('2d');
+    const foregroundCtx = foregroundCanvas.getContext('2d');
+
+    const rcBackground = rough.canvas(backgroundCanvas);
+    const rcForeground = rough.canvas(foregroundCanvas);
+
+    // Draw static background content
+    rcBackground.rectangle(0, 0, 800, 600, {
+        fill: "red"
+    }); // Example static rectangle
+
+    // Draw dynamic foreground content
+    let x1 = 100, y1 = 100, x2 = 300, y2 = 200;
+    function drawForeground() {
+        foregroundCtx.clearRect(0, 0, foregroundCanvas.width, foregroundCanvas.height);
+        rcForeground.line(x1, y1, x2, y1);
+        rcForeground.line(x2, y1, x2, y2);
+    }
+
+    // Initial draw
+    drawForeground();
+
+    // Example of updating the foreground content
+    setTimeout(() => {
+        x2 = 400; // Update the end point
+        drawForeground();
+    }, 2000);
+</script>
+</body>
+</html>

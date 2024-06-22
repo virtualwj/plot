@@ -102,7 +102,7 @@ export class Tween {
   }
 
   tick(t: number) {
-    if (t == 1 && this.finished) {
+    if (this.finished) {
       return
     }
     const {keys, from, to, timingFunction} = this;

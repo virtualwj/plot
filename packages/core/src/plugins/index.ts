@@ -1,4 +1,4 @@
 export * from './Drag'
 export * from './LineShape'
 export * from './Painter'
-export * from './TextPainter'
+export * from './AddText'

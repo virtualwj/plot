@@ -1,12 +1,14 @@
-import {Node} from "./Node"
+import {Node, NodeOptions} from "./Node"
 import {NodeAnchors} from "./anchors/NodeAnchors";
 import {Stage} from "../Stage";
+import {DrawElementOptions} from "@plot/render";
 
-export interface RectOptions {
+export interface RectOptions extends NodeOptions{
   x: number,
   y: number,
   w: number,
   h: number,
+  drawOptions?: Partial<DrawElementOptions>
 }
 
 export class Rect extends Node {
@@ -17,28 +19,30 @@ export class Rect extends Node {
   public h: number
   public nodeAnchor: NodeAnchors
   public type = 'rect'
+  public drawOptions: DrawElementOptions
 
   constructor(options: RectOptions, public stage: Stage) {
     super(stage);
     this.options = Object.assign({
       y: 100,
-      w: 100
+      w: 100,
+      drawOptions: {}
     }, options)
     this.x = this.options.x;
     this.y = this.options.y;
     this.w = this.options.w;
     this.h = this.options.h;
+    this.zIndex = this.options.zIndex || this.zIndex;
+    this.drawOptions = this.options.drawOptions as Partial<DrawElementOptions>;
     this.nodeAnchor = this.getAnchors();
   }
 
 
   draw() {
     //绘制基础图形
-    this.stage.engine.rectangle(this.x, this.y, this.w, this.h);
-    //更新锚点
-    this.nodeAnchor.update(this.originAnchors);
-    //绘制锚点
-    this.nodeAnchor.draw();
+    this.stage.engine.rectangle(this.x, this.y, this.w, this.h, this.drawOptions);
+
+    super.draw();
   }
 
   getAnchors() {
