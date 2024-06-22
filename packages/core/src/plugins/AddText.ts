@@ -3,24 +3,48 @@ import {Plugin} from "../Plugin";
 import {Text} from "../nodes/Text";
 
 export class AddText extends Plugin {
-  public fontSize= "30px";
+  public fontSize = "30px";
   public el!: HTMLInputElement;
   public name = 'TextPainter'
   public activeMode: Array<GraphMode> = ["text"]
   static priority = 10
+  public x:number = 0
+  public y:number = 0
 
   constructor(public stage: Stage) {
     super(stage);
     this.stage.on("click", ({e, x, y}) => {
-      if(!this.active) {
+      if (!this.active) {
         return
       }
+      if (this.el) {
+        this.addText(this.x, this.y)
+        e.preventDefault()
+        return;
+      }
 
-      this.el = this.createInput(e.clientX, e.clientY, x, y)
+      this.el = this.createInput(e, x, y)
     })
   }
 
-  createInput(x: number, y: number, offsetX: number, offsetY: number) {
+  addText(x: number, y: number) {
+    var {w, h} = this.stage.engine.getTextBounding(this.el.value, 30);
+
+    this.stage.addNode(new Text({
+      x: x,
+      y: y,
+      w: w,
+      h: h,
+      text: this.el.value
+    }, this.stage))
+
+    this.el.remove();
+    this.stage.defaultMode()
+    this.x = 0
+    this.y = 0
+  }
+
+  createInput(e: MouseEvent, x: number, y: number) {
     // 创建一个 input 元素
     const input = document.createElement('input');
 
@@ -33,22 +57,15 @@ export class AddText extends Plugin {
     input.style.outline = "none"
     input.style.background = "transparent"
     // 设置 input 元素的位置
-    input.style.left = `${x}px`;
-    input.style.top = `${y}px`;
+    input.style.left = `${e.clientX}px`;
+    input.style.top = `${e.clientY}px`;
+
+    this.x = x;
+    this.y = y;
+
     input.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
-        var {w,h} = this.stage.engine.getTextBounding(input.value, 30);
-
-        this.stage.addNode(new Text({
-          x: offsetX,
-          y: offsetY,
-          w: w ,
-          h: h ,
-          text: input.value
-        }, this.stage))
-
-        this.el.remove();
-        this.stage.defaultMode()
+        this.addText(x, y)
       }
     });
 

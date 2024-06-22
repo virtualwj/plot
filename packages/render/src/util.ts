@@ -37,3 +37,15 @@ export function sortArrayDescending(arr: Array<any>, key: string) {
 export function sortArrayAscending(arr: Array<any>, key: string) {
   return arr.sort((a, b) => a[key] - b[key]);
 }
+
+export function generateUUID(length: number) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let uuid = '';
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    uuid += chars[randomIndex];
+  }
+
+  return uuid;
+}
