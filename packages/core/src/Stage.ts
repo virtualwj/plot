@@ -6,6 +6,7 @@ import {Anchor} from "./nodes/anchors/Anchor";
 import {Plugin} from "./Plugin";
 import {DragElement, Painter, AddText, LineShape, DragStage} from "./plugins";
 import Animate from "./animate/tween/Animate";
+import {HotKeys} from "./plugins/HotKeys";
 
 // 声明 Stage 类
 export interface GraphOptions {
@@ -75,7 +76,7 @@ export class Stage extends EventEmitter<StageEvent> {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
 
-    this.options.plugin = this.options.plugin?.concat([LineShape, DragElement, Painter, AddText, DragStage]);
+    this.options.plugin = this.options.plugin?.concat([LineShape, DragElement, Painter, AddText, DragStage, HotKeys]);
     this.options.plugin = sortArrayDescending(this.options.plugin || [], "priority")
 
     this.plugin = this.options.plugin!.map(plugin => {
@@ -88,6 +89,7 @@ export class Stage extends EventEmitter<StageEvent> {
     this.animate = new Animate(this)
     //@ts-ignore
     console.log(window.stage = this)
+
   }
 
   /**
@@ -210,12 +212,19 @@ export class Stage extends EventEmitter<StageEvent> {
     };
   }
 
+  getTXPos(originX: number) {
+    return originX + this.translate.x
+  }
+
+  getTYPos(originY: number) {
+    return originY + this.translate.y
+  }
+
   bindEvent() {
     ["mousedown", "mousemove", "mouseup", "mouseout", "mouseleave", "dblclick", "contextmenu", "wheel", "click"].forEach(name => {
       this.element.addEventListener(name, (event) => {
         const e = event as MouseEvent;
         const {x, y, realX, realY} = this.getMousePos(e)
-        console.log(x, y, realX, realY, this.translate)
         //TODO
         // @ts-ignore
         this.emit(name, {

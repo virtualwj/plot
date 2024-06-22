@@ -30,6 +30,7 @@ export class DragElement extends Plugin {
           isMovingNodeOffsetX = x - node.x;
           isMovingNodeOffsetY = y - node.y;
           stage.movingNode = node
+          stage.selectedNode = node;
 
           stage.isMovingNode = true;
           stage.movingNode = node;

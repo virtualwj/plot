@@ -49,3 +49,41 @@ export function generateUUID(length: number) {
 
   return uuid;
 }
+
+export function deepCopy(obj: any, seen = new Map()) {
+  // 处理 null 或者非对象类型（包括 undefined、number、string、boolean、symbol、bigint、function）
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // 处理循环引用
+  if (seen.has(obj)) {
+    return seen.get(obj);
+  }
+
+  // 处理日期对象
+  if (obj instanceof Date) {
+    return new Date(obj);
+  }
+
+  // 处理正则表达式对象
+  if (obj instanceof RegExp) {
+    return new RegExp(obj);
+  }
+
+  // 创建一个新对象或数组
+  const copy: any = Array.isArray(obj) ? [] : {};
+
+  // 存储引用，处理循环引用
+  seen.set(obj, copy);
+
+  // 遍历对象的所有属性
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copy[key] = deepCopy(obj[key], seen);
+    }
+  }
+  return copy;
+}
+
+

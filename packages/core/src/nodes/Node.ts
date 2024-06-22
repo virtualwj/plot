@@ -71,4 +71,8 @@ export abstract class Node  {
       return !(anchors.includes(edge.startAnchor) || anchors.includes(edge.endAnchor));
     })
   }
+
+  copy(){
+    const copy = JSON.parse(JSON.stringify(this));
+  }
 }
