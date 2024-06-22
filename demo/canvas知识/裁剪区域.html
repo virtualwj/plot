@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Clip Example</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600"></canvas>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 创建一个圆形路径并将其设为剪切区域
+    ctx.beginPath();
+    ctx.arc(200, 200, 100, 0, Math.PI * 2, true); // 绘制一个圆形路径
+    ctx.clip(); // 将这个圆形路径设为剪切区域
+
+    // 在整个画布上绘制矩形，但只有剪切区域内的部分会显示
+    ctx.fillStyle = 'lightblue';
+    ctx.fillRect(0, 0, 400, 400); // 绘制一个覆盖整个画布的矩形
+
+    // 在剪切区域内绘制其他图形
+    ctx.fillStyle = 'red';
+    ctx.fillRect(150, 150, 100, 100); // 绘制一个红色矩形，部分在剪切区域内
+
+    // 保存当前状态，包括剪切区域
+    ctx.save();
+
+    // 移动剪切区域，并绘制新图形
+    ctx.translate(200, 200);
+    ctx.fillStyle = 'green';
+    ctx.fillRect(0, 0, 100, 100); // 绘制一个绿色矩形，全部在新的剪切区域内
+
+    // 恢复之前的状态，包括剪切区域
+    ctx.restore();
+
+    // 继续绘制，在原始剪切区域内
+    ctx.fillStyle = 'purple';
+    ctx.fillRect(50, 50, 100, 100); // 绘制一个紫色矩形，部分在剪切区域内
+</script>
+</body>
+</html>
+

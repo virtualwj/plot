@@ -1,4 +1,4 @@
-import {Stage, GraphMode} from "../Stage";
+import {Stage, StageMode} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
@@ -6,8 +6,8 @@ import {Plugin} from "../Plugin";
 
 export class LineShape extends Plugin{
   public name = "EventManager"
-  public activeMode: Array<GraphMode> = ["drag"]
-  static priority = 20
+  public activeMode: Array<StageMode> = ["drag"]
+  static priority = 12
 
   constructor(public stage: Stage) {
     super(stage);
@@ -28,14 +28,14 @@ export class LineShape extends Plugin{
         });
       });
     });
-    stage.on('mousemove', ({e, x, y}) => {
+    stage.on('mousemove', ({e, realX, realY}) => {
       if(!this.active) {
         return
       }
 
       if (stage.isAddingEdge && stage.isAddingStartAnchor) {
         stage.draw();
-        this.stage.engine.line(stage.isAddingStartAnchor.x, stage.isAddingStartAnchor.y, x, y);
+        this.stage.engine.line(stage.getTXPos(stage.isAddingStartAnchor.x), stage.getTYPos(stage.isAddingStartAnchor.y), realX, realY);
       }
     });
     stage.on('mouseup', ({e, x, y}) => {

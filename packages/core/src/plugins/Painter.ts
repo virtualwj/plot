@@ -1,4 +1,4 @@
-import {Stage, GraphMode} from "../Stage";
+import {Stage, StageMode} from "../Stage";
 import {Plugin} from "../Plugin";
 import {Rect, Node} from "../nodes";
 
@@ -10,7 +10,7 @@ export class Painter extends Plugin {
   public nodeType = "rect"
   public startX = 0;
   public startY = 0;
-  public activeMode: Array<GraphMode> = ["painter"]
+  public activeMode: Array<StageMode> = ["painter"]
   static priority = 10
 
   constructor(public stage: Stage, public options?: any) {

@@ -4,7 +4,7 @@ import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";
 import {Anchor} from "./nodes/anchors/Anchor";
 import {Plugin} from "./Plugin";
-import {Drag, Painter, AddText, LineShape} from "./plugins";
+import {DragElement, Painter, AddText, LineShape, DragStage} from "./plugins";
 import Animate from "./animate/tween/Animate";
 
 // 声明 Stage 类
@@ -14,32 +14,33 @@ export interface GraphOptions {
   plugin?: Array<typeof Plugin>
 }
 
-export type GraphMode = "drag" | "painter" | "pencil" | "text"
+export type StageMode = "drag" | "painter" | "pencil" | "text"
 
-export interface GraphEvent {
-  mousedown: { e: MouseEvent, x: number, y: number },
-  mouseup: { e: MouseEvent, x: number, y: number },
-  mousemove: { e: MouseEvent, x: number, y: number },
-  mouseleave: { e: MouseEvent, x: number, y: number },
-  contextmenu: { e: MouseEvent, x: number, y: number },
-  dblclick: { e: MouseEvent, x: number, y: number },
-  wheel: { e: MouseEvent, x: number, y: number },
-  click: { e: MouseEvent, x: number, y: number },
+export interface StageEvent {
+  mousedown: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  mouseup: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  mousemove: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  mouseleave: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  mouseout: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  contextmenu: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  dblclick: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  wheel: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  click: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
   animationEnd: { stage: Stage },
-  modeChange: { mode: GraphMode },
+  modeChange: { mode: StageMode },
 }
 
 
 /**
  * Stage 类
  */
-export class Stage extends EventEmitter<GraphEvent> {
+export class Stage extends EventEmitter<StageEvent> {
   nodes: Array<Node>
   edges: Array<Edge>
   engine: CanvasDrawer | SVGDrawer
   toolbar: HTMLDivElement
   plugin: Array<Plugin>
-  __mode: GraphMode = 'drag'
+  __mode: StageMode = 'drag'
 
   isAddingEdge = false
   isAddingStartAnchor?: Anchor | null
@@ -52,6 +53,11 @@ export class Stage extends EventEmitter<GraphEvent> {
   selectedNode!: null | Node
 
   animate!: Animate
+
+  translate: {
+    x: number,
+    y: number
+  } = {x: 0, y: 0}
 
   constructor(public element: HTMLCanvasElement | SVGSVGElement, public options: GraphOptions) {
     super()
@@ -69,8 +75,9 @@ export class Stage extends EventEmitter<GraphEvent> {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
 
-    this.options.plugin = this.options.plugin?.concat([LineShape, Drag, Painter, AddText]);
+    this.options.plugin = this.options.plugin?.concat([LineShape, DragElement, Painter, AddText, DragStage]);
     this.options.plugin = sortArrayDescending(this.options.plugin || [], "priority")
+
     this.plugin = this.options.plugin!.map(plugin => {
       return new plugin(this);
     })
@@ -79,6 +86,7 @@ export class Stage extends EventEmitter<GraphEvent> {
     // this.eventManager = new EventManager(this);
     this.mode = this.__mode;
     this.animate = new Animate(this)
+    //@ts-ignore
     console.log(window.stage = this)
   }
 
@@ -169,6 +177,9 @@ export class Stage extends EventEmitter<GraphEvent> {
   draw() {
     if (this.engine instanceof CanvasDrawer) {
       this.engine.ctx.clearRect(0, 0, this.engine.canvas.width, this.engine.canvas.height);
+      this.engine.ctx.save()
+      this.engine.ctx.translate(this.translate.x, this.translate.y)
+
     } else {
       this.element.innerHTML = ""
     }
@@ -178,6 +189,10 @@ export class Stage extends EventEmitter<GraphEvent> {
     this.plugin.forEach(plugin => {
       plugin.draw();
     })
+
+    if (this.engine instanceof CanvasDrawer) {
+      this.engine.ctx.restore()
+    }
     return this;
   }
 
@@ -186,22 +201,25 @@ export class Stage extends EventEmitter<GraphEvent> {
     const rect = this.element.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     let {width, height} = this.getElementSize();
-
+    // - this.translate.x 为了处理画布移动后，将坐标修正为原始未移动坐标
     return {
-      x: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr),
-      y: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr),
+      realX: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr) ,
+      realY: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr) ,
+      x: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr) - this.translate.x,
+      y: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr)- this.translate.y,
     };
   }
 
   bindEvent() {
-    ["mousedown", "mousemove", "mouseup", "mouseleave", "dblclick", "contextmenu", "wheel", "click"].forEach(name => {
+    ["mousedown", "mousemove", "mouseup", "mouseout", "mouseleave", "dblclick", "contextmenu", "wheel", "click"].forEach(name => {
       this.element.addEventListener(name, (event) => {
         const e = event as MouseEvent;
-        const {x, y} = this.getMousePos(e)
+        const {x, y, realX, realY} = this.getMousePos(e)
+        console.log(x, y, realX, realY, this.translate)
         //TODO
         // @ts-ignore
         this.emit(name, {
-          e, x, y
+          e, x, y, realX, realY
         })
       });
     })

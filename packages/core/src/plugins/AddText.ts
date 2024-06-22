@@ -1,4 +1,4 @@
-import {Stage, GraphMode} from "../Stage";
+import {Stage, StageMode} from "../Stage";
 import {Plugin} from "../Plugin";
 import {Text} from "../nodes/Text";
 
@@ -6,8 +6,8 @@ export class AddText extends Plugin {
   public fontSize = "30px";
   public el!: HTMLInputElement;
   public name = 'TextPainter'
-  public activeMode: Array<GraphMode> = ["text"]
-  static priority = 10
+  public activeMode: Array<StageMode> = ["text"]
+  static priority = 12
   public x:number = 0
   public y:number = 0
 

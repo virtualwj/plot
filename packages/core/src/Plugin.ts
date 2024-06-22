@@ -1,10 +1,10 @@
-import {Stage, GraphEvent, GraphMode} from "./Stage";
+import {Stage, StageEvent, StageMode} from "./Stage";
 import {CallbackFunction, StringKeyOf} from "./EventEmitter";
 
 export class Plugin {
   public name = 'Plugin';
   public active = true;
-  public activeMode: Array<GraphMode> = ["drag"];
+  public activeMode: Array<StageMode> = ["drag"];
   static priority: number = 0
 
   constructor(public stage: Stage, public options?: any) {
@@ -15,11 +15,11 @@ export class Plugin {
 
   }
 
-  // on<EventName extends StringKeyOf<GraphEvent>>(event: EventName, fn: CallbackFunction<GraphEvent, EventName>) {
+  // on<EventName extends StringKeyOf<StageEvent>>(event: EventName, fn: CallbackFunction<StageEvent, EventName>) {
   //   this.stage.on(event, fn)
   // }
 
-  modeChanged(mode: GraphMode) {
+  modeChanged(mode: StageMode) {
     this.active = this.activeMode.includes(mode);
   }
 

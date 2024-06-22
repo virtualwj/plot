@@ -1,5 +1,5 @@
 import {EventEmitter} from "../EventEmitter";
-import {Stage} from "../Stage";
+import {Stage, StageEvent} from "../Stage";
 import {NodeAnchors} from "./anchors/NodeAnchors";
 import {type Point} from "@plot/render";
 import {TweenSettings} from "../animate";
@@ -9,7 +9,7 @@ export interface NodeOptions {
   zIndex?:number
 }
 
-export abstract class Node extends EventEmitter<any> {
+export abstract class Node  {
   public type = 'node'
   public anchor: boolean = true
   public zIndex: number = 0
@@ -20,7 +20,6 @@ export abstract class Node extends EventEmitter<any> {
   w!: number //外接矩形宽
   h!: number //外接矩形高
   constructor(public stage: Stage) {
-    super();
   }
 
   draw() {
@@ -31,6 +30,10 @@ export abstract class Node extends EventEmitter<any> {
       this.nodeAnchor.draw();
     }
   }
+
+  // on(name:any, callback: Function){
+  //   this.stage.on(name, callback);
+  // }
 
   isPointInPath(x: number, y: number) {
     return false

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Save and Restore</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600"></canvas>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 初始绘图状态
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(50, 50, 100, 100); // 绘制蓝色矩形
+
+    // 保存当前状态
+    ctx.save();
+
+    // 修改绘图状态
+    ctx.fillStyle = 'red';
+    ctx.translate(200, 200);
+    ctx.fillRect(0, 0, 100, 100); // 绘制红色矩形
+
+    // 恢复到之前的状态
+    ctx.restore();
+
+    // 继续使用恢复后的状态绘图
+    ctx.fillRect(150, 150, 100, 100); // 绘制蓝色矩形
+
+    // 再次保存当前状态
+    ctx.save();
+
+    // 修改绘图状态
+    ctx.fillStyle = 'green';
+    ctx.fillRect(300, 300, 100, 100); // 绘制绿色矩形
+
+    // 恢复到之前的状态
+    ctx.restore();
+
+    // 继续使用恢复后的状态绘图
+    ctx.fillRect(400, 400, 100, 100); // 绘制蓝色矩形
+</script>
+</body>
+</html>

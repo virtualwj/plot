@@ -1,13 +1,13 @@
-import {Stage, GraphMode} from "../Stage";
+import {Stage, StageMode} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
 
 
-export class Drag extends Plugin {
+export class DragElement extends Plugin {
   public name = "EventManager"
-  public activeMode: Array<GraphMode> = ["drag"]
-  static priority = 10
+  public activeMode: Array<StageMode> = ["drag"]
+  static priority = 11
 
   constructor(public stage: Stage) {
     super(stage);
@@ -17,9 +17,11 @@ export class Drag extends Plugin {
     let isMovingNodeOffsetY = 0;
 
     stage.on('mousedown', ({e, x, y}) => {
+
       if (!this.active || stage.isAddingEdge) {
         return
       }
+
       for (let i = stage.nodes.length - 1; i >= 0; i--) {
         const node = stage.nodes[i]
         if (node.isPointInPath(x, y)) {
@@ -54,6 +56,15 @@ export class Drag extends Plugin {
       reset()
       stage.draw();
     });
+
+    stage.on('mouseout', (e) => {
+      if (!this.active) {
+        return
+      }
+      reset()
+      stage.draw();
+    });
+
 
     stage.on('mouseup', ({e, x, y}) => {
       if (!this.active) {

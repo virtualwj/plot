@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Dragging</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600"></canvas>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let draggedX = 0, draggedY = 0;
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(draggedX, draggedY);
+        // 在这里绘制你的引擎内容
+        ctx.fillStyle = 'red';
+        ctx.fillRect(100, 100, 200, 200); // 示例矩形
+        ctx.restore();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX - offsetX;
+        startY = e.clientY - offsetY;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
+            draggedX = offsetX;
+            draggedY = offsetY;
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        isDragging = false;
+    });
+
+    draw(); // 初始绘制
+</script>
+</body>
+</html>
+
