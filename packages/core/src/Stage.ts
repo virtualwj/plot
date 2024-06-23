@@ -4,7 +4,7 @@ import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";
 import {Anchor} from "./nodes/anchors/Anchor";
 import {Plugin} from "./Plugin";
-import {DragElement, Painter, AddText, LineShape, DragStage} from "./plugins";
+import {DragElement, Painter, AddText, LineShape, DragStage, Ruler} from "./plugins";
 import Animate from "./animate/tween/Animate";
 import {HotKeys} from "./plugins/HotKeys";
 
@@ -25,7 +25,7 @@ export interface StageEvent {
   mouseout: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
   contextmenu: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
   dblclick: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
-  wheel: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
+  wheel: { e: WheelEvent, x: number, y: number, realX: number, realY: number },
   click: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
   animationEnd: { stage: Stage },
   modeChange: { mode: StageMode },
@@ -78,8 +78,8 @@ export class Stage extends EventEmitter<StageEvent> {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
 
-    this.options.plugin = this.options.plugin?.concat([LineShape, DragElement, Painter, AddText, DragStage, HotKeys]);
-    this.options.plugin = sortArrayDescending(this.options.plugin || [], "priority")
+    this.options.plugin = this.options.plugin?.concat([Ruler, LineShape, DragElement, Painter, AddText, DragStage, HotKeys]);
+    this.options.plugin = sortArrayAscending(this.options.plugin || [], "priority")
 
     this.plugin = this.options.plugin!.map(plugin => {
       return new plugin(this);
@@ -91,7 +91,6 @@ export class Stage extends EventEmitter<StageEvent> {
     this.animate = new Animate(this)
     //@ts-ignore
     console.log(window.stage = this)
-
   }
 
   /**
@@ -102,12 +101,12 @@ export class Stage extends EventEmitter<StageEvent> {
     let addIndex = this.nodes.length
     for (let i = 0; i < this.nodes.length; i++) {
       const el = this.nodes[i]
-      if (node.zIndex < el.zIndex) {
+      if (node.layer < el.layer) {
         addIndex = i || 0;
         break;
       }
 
-      if (node.zIndex >= el.zIndex && i === this.nodes.length - 1) {
+      if (node.layer >= el.layer && i === this.nodes.length - 1) {
         addIndex = i + 1
         break
       }
@@ -166,6 +165,14 @@ export class Stage extends EventEmitter<StageEvent> {
     }
   }
 
+  getElementRealSize() {
+    const rect = this.element.getBoundingClientRect();
+    return {
+      width: rect.width,
+      height: rect.height,
+    }
+  }
+
   showToolbar(e: any) {
     const mousePos = this.getMousePos(e);
     this.toolbar.style.display = 'block';
@@ -192,16 +199,18 @@ export class Stage extends EventEmitter<StageEvent> {
     if (this.engine instanceof CanvasDrawer) {
       this.engine.ctx.clearRect(0, 0, this.engine.canvas.width, this.engine.canvas.height);
       this.engine.ctx.save()
-      this.engine.ctx.translate(this.translate.x, this.translate.y)
       this.engine.ctx.scale(this.zoom, this.zoom); // 按照当前比例缩放
+      this.engine.ctx.translate(this.translate.x, this.translate.y)
     } else {
       this.element.innerHTML = ""
     }
 
-    this.nodes.forEach(node => node.draw())
-    this.edges.forEach(edge => edge.draw())
-    this.plugin.forEach(plugin => {
-      plugin.draw();
+
+    const renderByPriority = sortArrayAscending([...this.nodes, ...this.edges, ...this.plugin], "layer")
+    // this.nodes.forEach(node => node.draw())
+    // this.edges.forEach(edge => edge.draw())
+    renderByPriority.forEach(obj => {
+      obj.draw();
     })
 
     if (this.engine instanceof CanvasDrawer) {
@@ -219,16 +228,16 @@ export class Stage extends EventEmitter<StageEvent> {
     return {
       realX: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr),
       realY: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr),
-      x: ((e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr)  - this.translate.x) / this.zoom,
-      y: ((e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr) - this.translate.y) /  this.zoom,
+      x: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr)  / this.zoom - this.translate.x,
+      y: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr) / this.zoom - this.translate.y,
     };
   }
 
   //从原始坐标转为变换后的坐标
-  toTransformPos(originX:number, originY:number) {
+  toTransformPos(originX: number, originY: number) {
     return {
-      x: (originX * this.zoom + this.translate.x),
-      y: (originY * this.zoom + this.translate.y)
+      x: (originX  + this.translate.x) * this.zoom,
+      y: (originY + this.translate.y) * this.zoom
     }
   }
 

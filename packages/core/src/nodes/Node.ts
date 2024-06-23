@@ -6,13 +6,13 @@ import {TweenSettings} from "../animate";
 
 export interface NodeOptions {
   anchor?: boolean
-  zIndex?:number
+  layer?: number
 }
 
-export abstract class Node  {
+export abstract class Node {
   public type = 'node'
   public anchor: boolean = true
-  public zIndex: number = 0
+  public layer: number = 10
   nodeAnchor!: NodeAnchors
   //x,y图形参照坐标
   x!: number
@@ -72,7 +72,11 @@ export abstract class Node  {
     })
   }
 
-  copy(){
+  copy() {
     const copy = JSON.parse(JSON.stringify(this));
+  }
+
+  setLayer(l: number) {
+    this.layer = l;
   }
 }

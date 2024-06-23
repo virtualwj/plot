@@ -4,6 +4,7 @@ import {Pointer} from "./Pointer";
 
 export class Edge{
   public stage:Stage
+  public layer:number = 10
 
   constructor(public startAnchor: Anchor, public endAnchor: Anchor) {
     this.stage = startAnchor.stage

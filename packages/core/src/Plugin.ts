@@ -5,7 +5,8 @@ export class Plugin {
   public name = 'Plugin';
   public active = true;
   public activeMode: Array<StageMode> = ["drag"];
-  static priority: number = 0
+  public layer: number = 0
+  static priority: number = 10
 
   constructor(public stage: Stage, public options?: any) {
 

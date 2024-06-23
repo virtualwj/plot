@@ -33,7 +33,7 @@ function addSquare() {
     y: 100,
     w: 100,
     h: 100,
-    zIndex: 10,
+      layer: 10,
     drawOptions: {
       fill: "red"
     }

@@ -7,12 +7,13 @@ import {Plugin} from "../Plugin";
 export class LineShape extends Plugin {
   public name = "EventManager"
   public activeMode: Array<StageMode> = ["drag"]
-  static priority = 12
+  static priority: number = 0
 
   constructor(public stage: Stage) {
     super(stage);
     //连线
     stage.on('mousedown', ({e, x, y}) => {
+
       if (!this.active) {
         return
       }
@@ -32,7 +33,6 @@ export class LineShape extends Plugin {
       if (!this.active) {
         return
       }
-
 
       if (stage.isAddingEdge && stage.isAddingStartAnchor) {
         stage.draw();

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas with Preview</title>
+    <style>
+        #mainCanvas {
+            border: 1px solid black;
+            position: relative;
+        }
+        #previewCanvas {
+            border: 1px solid black;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+            height: 150px;
+            background-color: white;
+        }
+        .container {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <canvas id="mainCanvas" width="800" height="600"></canvas>
+    <canvas id="previewCanvas" width="200" height="150"></canvas>
+</div>
+<br>
+<button onclick="drawRandomShapes()">Draw Random Shapes</button>
+<button onclick="clearCanvas()">Clear Canvas</button>
+<script>
+    const mainCanvas = document.getElementById('mainCanvas');
+    const mainCtx = mainCanvas.getContext('2d');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
+
+    function draw() {
+        // 示例：在主Canvas上绘制一些内容
+        mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+        mainCtx.fillStyle = 'lightblue';
+        mainCtx.fillRect(100, 100, 200, 200);
+
+        mainCtx.fillStyle = 'red';
+        mainCtx.beginPath();
+        mainCtx.arc(400, 300, 50, 0, 2 * Math.PI);
+        mainCtx.fill();
+
+        // 同步更新预览Canvas
+        updatePreview();
+    }
+
+    function updatePreview() {
+        // 清除预览Canvas
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+        // 计算缩放比例
+        const scaleX = previewCanvas.width / mainCanvas.width;
+        const scaleY = previewCanvas.height / mainCanvas.height;
+
+        // 缩放并绘制主Canvas的内容到预览Canvas
+        previewCtx.save();
+        previewCtx.scale(scaleX, scaleY);
+        previewCtx.drawImage(mainCanvas, 0, 0);
+        previewCtx.restore();
+    }
+
+    // 绘制随机形状
+    function drawRandomShapes() {
+        const shapes = ['rect', 'circle', 'line'];
+        for (let i = 0; i < 10; i++) {
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const x = Math.random() * mainCanvas.width;
+            const y = Math.random() * mainCanvas.height;
+            const size = Math.random() * 50 + 20;
+
+            mainCtx.beginPath();
+            if (shape === 'rect') {
+                mainCtx.fillRect(x, y, size, size);
+            } else if (shape === 'circle') {
+                mainCtx.arc(x, y, size / 2, 0, 2 * Math.PI);
+                mainCtx.fill();
+            } else if (shape === 'line') {
+                const x2 = Math.random() * mainCanvas.width;
+                const y2 = Math.random() * mainCanvas.height;
+                mainCtx.moveTo(x, y);
+                mainCtx.lineTo(x2, y2);
+                mainCtx.stroke();
+            }
+            mainCtx.closePath();
+        }
+
+        // 更新预览
+        updatePreview();
+    }
+
+    // 清除画布
+    function clearCanvas() {
+        mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+        updatePreview();
+    }
+
+    // 初始绘制
+    draw();
+</script>
+</body>
+</html>

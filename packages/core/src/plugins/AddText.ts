@@ -7,7 +7,8 @@ export class AddText extends Plugin {
   public el: HTMLInputElement | undefined;
   public name = 'TextPainter'
   public activeMode: Array<StageMode> = ["text"]
-  static priority = 12
+  public layer = 12
+  static priority = 0
   public x:number = 0
   public y:number = 0
 

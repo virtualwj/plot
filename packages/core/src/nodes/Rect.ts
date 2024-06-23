@@ -32,7 +32,7 @@ export class Rect extends Node {
     this.y = this.options.y;
     this.w = this.options.w;
     this.h = this.options.h;
-    this.zIndex = this.options.zIndex || this.zIndex;
+    this.layer = this.options.layer || this.layer;
     this.drawOptions = this.options.drawOptions as Partial<DrawElementOptions>;
     this.nodeAnchor = this.getAnchors();
   }

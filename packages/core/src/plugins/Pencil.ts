@@ -9,7 +9,7 @@ export class Pencil extends Plugin {
   public startX = 0;
   public startY = 0;
   public activeMode: Array<StageMode> = ["pencil"]
-  static priority = 10
+  static priority = 4
 
   constructor(public stage: Stage, public options?: any) {
     super(stage);

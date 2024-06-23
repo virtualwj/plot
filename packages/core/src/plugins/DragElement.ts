@@ -7,7 +7,7 @@ import {Plugin} from "../Plugin";
 export class DragElement extends Plugin {
   public name = "EventManager"
   public activeMode: Array<StageMode> = ["drag"]
-  static priority = 11
+  static priority = 1
 
   constructor(public stage: Stage) {
     super(stage);

@@ -3,17 +3,17 @@ import {Plugin} from "../Plugin";
 
 //画布拖动
 export class DragStage extends Plugin {
-  static priority: number = 10
+  static priority: number = 2
 
   constructor(public stage: Stage, public options?: any) {
     super(stage);
 
     let isDragging = false;
-    let startX:number = 0, startY:number = 0;
-    let oldTx:number = 0, oldTy:number = 0;
+    let startX: number = 0, startY: number = 0;
+    let oldTx: number = 0, oldTy: number = 0;
 
     stage.on('mousedown', ({e}) => {
-      if(!this.active || this.stage.isMovingNode || this.stage.isAddingEdge) {
+      if (!this.active || this.stage.isMovingNode || this.stage.isAddingEdge) {
         isDragging = false
         return
       }
