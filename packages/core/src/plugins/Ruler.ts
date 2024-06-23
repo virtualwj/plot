@@ -25,7 +25,6 @@ export class Ruler extends Plugin {
 
     // 鼠标移动事件
     stage.on('mousemove', ({e, x, y, realX, realY}) => {
-      console.log(realX, realY, x, y)
       if (dragging) {
         offsetX = realX - dragStart.x;
         offsetY = realY - dragStart.y;
@@ -42,7 +41,6 @@ export class Ruler extends Plugin {
     stage.on('wheel', ({e, x, y}) => {
       e.preventDefault();
       let step = 0.01
-      console.log(step, this.stage.zoom)
       const zoom = e.deltaY < 0 ? (1 + step) : (1- step);
       this.stage.zoom = this.stage.zoom * zoom
       this.stage.draw();

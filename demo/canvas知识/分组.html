@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Grouping Example</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        .container {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <canvas id="canvas" width="800" height="600"></canvas>
+</div>
+<br>
+<button onclick="ungroup()">Ungroup</button>
+<button onclick="groupSelected()">Group Selected</button>
+<button onclick="resetTransform()">Reset Transform</button>
+<script>
+    class Shape {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        draw(ctx) {
+            // 子类实现具体绘制逻辑
+        }
+
+        isPointInside(x, y) {
+            // 子类实现具体点检测逻辑
+            return false;
+        }
+    }
+
+    class Rectangle extends Shape {
+        constructor(x, y, width, height, color) {
+            super(x, y);
+            this.width = width;
+            this.height = height;
+            this.color = color;
+        }
+
+        draw(ctx) {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        isPointInside(x, y) {
+            return x > this.x && x < this.x + this.width && y > this.y && y < this.y + this.height;
+        }
+    }
+
+    class Circle extends Shape {
+        constructor(x, y, radius, color) {
+            super(x, y);
+            this.radius = radius;
+            this.color = color;
+        }
+
+        draw(ctx) {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        isPointInside(x, y) {
+            const dx = x - this.x;
+            const dy = y - this.y;
+            return dx * dx + dy * dy <= this.radius * this.radius;
+        }
+    }
+
+    class Group {
+        constructor() {
+            this.shapes = [];
+            this.transform = {
+                x: 0,
+                y: 0,
+                scale: 1,
+                rotation: 0
+            };
+        }
+
+        addShape(shape) {
+            this.shapes.push(shape);
+        }
+
+        draw(ctx) {
+            ctx.save();
+            ctx.translate(this.transform.x, this.transform.y);
+            ctx.scale(this.transform.scale, this.transform.scale);
+            ctx.rotate(this.transform.rotation * Math.PI / 180);
+            for (const shape of this.shapes) {
+                shape.draw(ctx);
+            }
+            ctx.restore();
+        }
+
+        move(dx, dy) {
+            this.transform.x += dx;
+            this.transform.y += dy;
+        }
+
+        rotate(angle) {
+            this.transform.rotation += angle;
+        }
+
+        scale(s) {
+            this.transform.scale *= s;
+        }
+
+        reset() {
+            this.transform = {
+                x: 0,
+                y: 0,
+                scale: 1,
+                rotation: 0
+            };
+        }
+
+        ungroup() {
+            return this.shapes;
+        }
+
+        isPointInside(x, y) {
+            // 检查是否在组内的任何形状内
+            for (const shape of this.shapes) {
+                if (shape.isPointInside(x, y)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let shapes = [];
+    let selectedGroup = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let isDragging = false;
+    let selectionStart = null;
+    let selectionEnd = null;
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const shape of shapes) {
+            shape.draw(ctx);
+        }
+        if (selectionStart && selectionEnd) {
+            ctx.strokeStyle = 'blue';
+            ctx.strokeRect(
+                selectionStart.x,
+                selectionStart.y,
+                selectionEnd.x - selectionStart.x,
+                selectionEnd.y - selectionStart.y
+            );
+        }
+    }
+
+    function ungroup() {
+        if (selectedGroup && selectedGroup instanceof Group) {
+            const ungroupedShapes = selectedGroup.ungroup();
+            shapes = shapes.filter(shape => shape !== selectedGroup).concat(ungroupedShapes);
+            selectedGroup = null;
+            draw();
+        }
+    }
+
+    function groupSelected() {
+        const group = new Group();
+        for (const shape of shapes) {
+            if (shape.isPointInside(selectionStart.x, selectionStart.y) && shape.isPointInside(selectionEnd.x, selectionEnd.y)) {
+                group.addShape(shape);
+            }
+        }
+        shapes = shapes.filter(shape => !group.shapes.includes(shape));
+        shapes.push(group);
+        selectionStart = null;
+        selectionEnd = null;
+        draw();
+    }
+
+    function resetTransform() {
+        if (selectedGroup) {
+            selectedGroup.reset();
+            draw();
+        }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        selectedGroup = null;
+        for (const shape of shapes) {
+            if (shape.isPointInside(x, y)) {
+                selectedGroup = shape;
+                dragOffsetX = x - (shape.transform ? shape.transform.x : shape.x);
+                dragOffsetY = y - (shape.transform ? shape.transform.y : shape.y);
+                isDragging = true;
+                break;
+            }
+        }
+        if (!selectedGroup) {
+            selectionStart = { x, y };
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (isDragging && selectedGroup) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            selectedGroup.move(x - dragOffsetX - (selectedGroup.transform ? selectedGroup.transform.x : 0), y - dragOffsetY - (selectedGroup.transform ? selectedGroup.transform.y : 0));
+            dragOffsetX = x - (selectedGroup.transform ? selectedGroup.transform.x : selectedGroup.x);
+            dragOffsetY = y - (selectedGroup.transform ? selectedGroup.transform.y : selectedGroup.y);
+            draw();
+        } else if (selectionStart) {
+            const rect = canvas.getBoundingClientRect();
+            selectionEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+        isDragging = false;
+        if (selectionStart && selectionEnd) {
+            groupSelected();
+        }
+    });
+
+    // 创建初始形状和组
+    const group = new Group();
+    group.addShape(new Rectangle(100, 100, 200, 100, 'lightblue'));
+    group.addShape(new Circle(200, 200, 50, 'red'));
+    shapes.push(group);
+
+    // 初始绘制
+    draw();
+</script>
+</body>
+</html>

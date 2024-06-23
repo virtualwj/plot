@@ -29,7 +29,6 @@ export class DragStage extends Plugin {
         this.stage.translate.x =  oldTx + (e.clientX -  startX)
         this.stage.translate.y = oldTy + (e.clientY -  startY)
         this.stage.draw();
-        console.log(e.clientX -  startX)
       }
     });
 

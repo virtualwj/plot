@@ -50,7 +50,7 @@ export class SVGDrawer {
     this.svg.appendChild(line);
   }
 
-  polygon(points: Array<PointArray>) {
+  polygon(points: Array<PointArray>, isClosePath = true) {
     //待补充
   }
 

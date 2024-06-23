@@ -4,7 +4,7 @@ import {Edge} from "./edges/Edge";
 import {EventEmitter} from "./EventEmitter";
 import {Anchor} from "./nodes/anchors/Anchor";
 import {Plugin} from "./Plugin";
-import {DragElement, Painter, AddText, LineShape, DragStage, Ruler} from "./plugins";
+import {DragElement, Painter, AddText, LineShape, DragStage, Ruler, Pencil} from "./plugins";
 import Animate from "./animate/tween/Animate";
 import {HotKeys} from "./plugins/HotKeys";
 
@@ -78,7 +78,7 @@ export class Stage extends EventEmitter<StageEvent> {
       this.engine = new CanvasDrawer(element as HTMLCanvasElement);
     }
 
-    this.options.plugin = this.options.plugin?.concat([Ruler, LineShape, DragElement, Painter, AddText, DragStage, HotKeys]);
+    this.options.plugin = this.options.plugin?.concat([Pencil, Ruler, LineShape, DragElement, Painter, AddText, DragStage, HotKeys]);
     this.options.plugin = sortArrayAscending(this.options.plugin || [], "priority")
 
     this.plugin = this.options.plugin!.map(plugin => {

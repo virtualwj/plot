@@ -19,7 +19,7 @@ export class Text extends Node {
   public h: number
   public text: string
   public fontSize= "30px"
-  public padding= 5
+  public padding= 0
 
   constructor(options: TextOptions, public stage: Stage) {
     super(stage);
@@ -34,7 +34,7 @@ export class Text extends Node {
 
   draw() {
     //绘制基础图形
-    this.stage.engine.text(this.text, this.x +  + this.padding, this.y +  + this.padding, {
+    this.stage.engine.text(this.text, this.x + this.padding, this.y  + this.padding, {
       font: this.fontSize + "Arial"
     });
     super.draw();

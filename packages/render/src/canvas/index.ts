@@ -32,6 +32,7 @@ export class CanvasDrawer {
     const {fill, stroke, lineWidth = 1} = options;
     const ctx = this.ctx;
     ctx.beginPath();
+
     ctx.rect(x, y, width, height);
 
     if (fill) {
@@ -57,7 +58,7 @@ export class CanvasDrawer {
     ctx.closePath();
   }
 
-  polygon(points: Array<PointArray>) {
+  polygon(points: Array<PointArray>, isClosePath = true) {
     if (points.length < 2) return; // 确保有足够的点绘制多边形
     const ctx = this.ctx;
 
@@ -66,9 +67,10 @@ export class CanvasDrawer {
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(points[i][0], points[i][1]);
     }
-    ctx.closePath(); // 关闭路径，形成闭合的多边形
+    if (isClosePath) {
+      ctx.closePath(); // 关闭路径，形成闭合的多边形
+    }
     ctx.stroke(); // 描边
-    ctx.closePath();
   }
 
   //圆的中心的 x 坐标。
@@ -77,12 +79,12 @@ export class CanvasDrawer {
   // sAngle	起始角，以弧度计。（弧的圆形的三点钟位置是 0 度）。
   // eAngle	结束角，以弧度计。
   // counterclockwise	可选。规定应该逆时针还是顺时针绘图。False = 顺时针，true = 逆时针。
-  arc(x: number, y: number, r: number, sAngle: number, eAngle: number, counterclockwise: boolean,  options: DrawElementOptions = {}) {
+  arc(x: number, y: number, r: number, sAngle: number, eAngle: number, counterclockwise: boolean, options: DrawElementOptions = {}) {
     const ctx = this.ctx;
     const {stroke, lineWidth = 1} = options;
 
     ctx.beginPath();
-    ctx.arc(x,y,r,sAngle,eAngle,counterclockwise);
+    ctx.arc(x, y, r, sAngle, eAngle, counterclockwise);
     ctx.strokeStyle = stroke || "#333";
     ctx.lineWidth = lineWidth || 1;
     ctx.stroke();
@@ -108,6 +110,7 @@ export class CanvasDrawer {
   }
 
   text(text: string, x: number, y: number, options: Partial<DrawFontElementOptions> = {}) {
+    this.ctx.save();
     const {font, color, align, baseline} = Object.assign({
       font: '12px Arial',
       color: 'black',
@@ -121,6 +124,7 @@ export class CanvasDrawer {
     this.ctx.textBaseline = baseline;
     this.ctx.fillText(text, x, y);
     this.ctx.closePath();
+    this.ctx.restore();
   }
 
   getTextBounding(text: string, fontSize: number = 14) {

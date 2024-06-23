@@ -9,8 +9,8 @@ export class AddText extends Plugin {
   public activeMode: Array<StageMode> = ["text"]
   public layer = 12
   static priority = 0
-  public x:number = 0
-  public y:number = 0
+  public x: number = 0
+  public y: number = 0
 
   constructor(public stage: Stage) {
     super(stage);
@@ -29,7 +29,7 @@ export class AddText extends Plugin {
   }
 
   addText(x: number, y: number) {
-    if(this.el) {
+    if (this.el) {
       var {w, h} = this.stage.engine.getTextBounding(this.el.value, 30);
 
       this.stage.addNode(new Text({
@@ -55,9 +55,10 @@ export class AddText extends Plugin {
     // 添加隐藏边框的样式类
     input.className = 'hidden-border-input';
     input.style.fontSize = '30px'
+    input.style.fontFamily = 'Arial'
     input.style.position = "absolute"
     input.style.border = "none"
-    input.style.lineHeight = "36px"
+    // input.style.lineHeight = "36px"
     input.style.outline = "none"
     input.style.background = "transparent"
     // 设置 input 元素的位置
@@ -68,6 +69,10 @@ export class AddText extends Plugin {
     this.y = y;
 
     input.addEventListener('keydown', event => {
+      var {w, h} = this.stage.engine.getTextBounding(input.value, 30);
+
+      console.log(x, y, w, h)
+
       if (event.key === 'Enter') {
         this.addText(x, y)
       }

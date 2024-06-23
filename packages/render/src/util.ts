@@ -86,4 +86,11 @@ export function deepCopy(obj: any, seen = new Map()) {
   return copy;
 }
 
+export function isPointOnLine(px: number, py: number, x1: number, y1: number, x2: number, y2: number, tolerance = 5) {
+  const d1 = Math.hypot(px - x1, py - y1);
+  const d2 = Math.hypot(px - x2, py - y2);
+  const lineLength = Math.hypot(x2 - x1, y2 - y1);
+  return d1 + d2 >= lineLength - tolerance && d1 + d2 <= lineLength + tolerance;
+}
+
 
