@@ -4,7 +4,7 @@ import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
 
 
-export class LineShape extends Plugin{
+export class LineShape extends Plugin {
   public name = "EventManager"
   public activeMode: Array<StageMode> = ["drag"]
   static priority = 12
@@ -13,7 +13,7 @@ export class LineShape extends Plugin{
     super(stage);
     //连线
     stage.on('mousedown', ({e, x, y}) => {
-      if(!this.active) {
+      if (!this.active) {
         return
       }
 
@@ -29,17 +29,19 @@ export class LineShape extends Plugin{
       });
     });
     stage.on('mousemove', ({e, realX, realY}) => {
-      if(!this.active) {
+      if (!this.active) {
         return
       }
 
+
       if (stage.isAddingEdge && stage.isAddingStartAnchor) {
         stage.draw();
-        this.stage.engine.line(stage.getTXPos(stage.isAddingStartAnchor.x), stage.getTYPos(stage.isAddingStartAnchor.y), realX, realY);
+        const {x, y} = stage.toTransformPos(stage.isAddingStartAnchor.x, stage.isAddingStartAnchor.y)
+        this.stage.engine.line(x, y, realX, realY);
       }
     });
     stage.on('mouseup', ({e, x, y}) => {
-      if(!this.active) {
+      if (!this.active) {
         return
       }
 
@@ -58,7 +60,7 @@ export class LineShape extends Plugin{
       stage.draw();
     });
     stage.on('mouseleave', (e) => {
-      if(!this.active) {
+      if (!this.active) {
         return
       }
 

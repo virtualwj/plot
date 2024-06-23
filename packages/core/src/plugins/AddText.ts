@@ -4,7 +4,7 @@ import {Text} from "../nodes/Text";
 
 export class AddText extends Plugin {
   public fontSize = "30px";
-  public el!: HTMLInputElement;
+  public el: HTMLInputElement | undefined;
   public name = 'TextPainter'
   public activeMode: Array<StageMode> = ["text"]
   static priority = 12
@@ -28,20 +28,23 @@ export class AddText extends Plugin {
   }
 
   addText(x: number, y: number) {
-    var {w, h} = this.stage.engine.getTextBounding(this.el.value, 30);
+    if(this.el) {
+      var {w, h} = this.stage.engine.getTextBounding(this.el.value, 30);
 
-    this.stage.addNode(new Text({
-      x: x,
-      y: y,
-      w: w,
-      h: h,
-      text: this.el.value
-    }, this.stage))
+      this.stage.addNode(new Text({
+        x: x,
+        y: y,
+        w: w,
+        h: h,
+        text: this.el.value
+      }, this.stage))
 
-    this.el.remove();
-    this.stage.defaultMode()
-    this.x = 0
-    this.y = 0
+      this.el.remove();
+      this.el = undefined;
+      this.stage.defaultMode()
+      this.x = 0
+      this.y = 0
+    }
   }
 
   createInput(e: MouseEvent, x: number, y: number) {

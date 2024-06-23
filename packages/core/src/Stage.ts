@@ -29,6 +29,7 @@ export interface StageEvent {
   click: { e: MouseEvent, x: number, y: number, realX: number, realY: number },
   animationEnd: { stage: Stage },
   modeChange: { mode: StageMode },
+  zoom: { zoom: number },
 }
 
 
@@ -59,6 +60,7 @@ export class Stage extends EventEmitter<StageEvent> {
     x: number,
     y: number
   } = {x: 0, y: 0}
+  __zoom: number = 1
 
   constructor(public element: HTMLCanvasElement | SVGSVGElement, public options: GraphOptions) {
     super()
@@ -175,13 +177,23 @@ export class Stage extends EventEmitter<StageEvent> {
     this.toolbar.style.display = 'none';
   }
 
+  get zoom() {
+    return this.__zoom
+  }
+
+  set zoom(zoom: number) {
+    this.__zoom = zoom;
+    this.emit("zoom", {zoom})
+    this.draw()
+  }
+
 
   draw() {
     if (this.engine instanceof CanvasDrawer) {
       this.engine.ctx.clearRect(0, 0, this.engine.canvas.width, this.engine.canvas.height);
       this.engine.ctx.save()
       this.engine.ctx.translate(this.translate.x, this.translate.y)
-
+      this.engine.ctx.scale(this.zoom, this.zoom); // 按照当前比例缩放
     } else {
       this.element.innerHTML = ""
     }
@@ -205,19 +217,19 @@ export class Stage extends EventEmitter<StageEvent> {
     let {width, height} = this.getElementSize();
     // - this.translate.x 为了处理画布移动后，将坐标修正为原始未移动坐标
     return {
-      realX: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr) ,
-      realY: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr) ,
-      x: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr) - this.translate.x,
-      y: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr)- this.translate.y,
+      realX: (e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr),
+      realY: (e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr),
+      x: ((e.clientX - rect.left) / (rect.right - rect.left) * (width as number / dpr)  - this.translate.x) / this.zoom,
+      y: ((e.clientY - rect.top) / (rect.bottom - rect.top) * (height as number / dpr) - this.translate.y) /  this.zoom,
     };
   }
 
-  getTXPos(originX: number) {
-    return originX + this.translate.x
-  }
-
-  getTYPos(originY: number) {
-    return originY + this.translate.y
+  //从原始坐标转为变换后的坐标
+  toTransformPos(originX:number, originY:number) {
+    return {
+      x: (originX * this.zoom + this.translate.x),
+      y: (originY * this.zoom + this.translate.y)
+    }
   }
 
   bindEvent() {
