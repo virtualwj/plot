@@ -3,13 +3,16 @@ import {Stage, StageEvent} from "../Stage";
 import {NodeAnchors} from "./anchors/NodeAnchors";
 import {type Point} from "@plot/render";
 import {TweenSettings} from "../animate";
+import {Anchor} from "./anchors/Anchor";
 
 export interface NodeOptions {
   anchor?: boolean
   layer?: number
 }
+interface NodeEvent {
 
-export abstract class Node {
+}
+export  class Node extends EventEmitter<NodeEvent>{
   public type = 'node'
   public anchor: boolean = true
   public layer: number = 10
@@ -20,6 +23,7 @@ export abstract class Node {
   w!: number //外接矩形宽
   h!: number //外接矩形高
   constructor(public stage: Stage) {
+    super()
   }
 
   draw() {
@@ -29,6 +33,11 @@ export abstract class Node {
       //绘制锚点
       this.nodeAnchor.draw();
     }
+  }
+
+  //渲染包围盒矩形
+  drawOutLine(){
+
   }
 
   // on(name:any, callback: Function){
@@ -68,7 +77,7 @@ export abstract class Node {
     this.stage.nodes.splice(deleteIndex, 1);
     //删除相关边
     this.stage.edges = this.stage.edges.filter((edge, index) => {
-      return !(anchors.includes(edge.startAnchor) || anchors.includes(edge.endAnchor));
+      return !(anchors.includes(edge.start as Anchor) || anchors.includes(edge.end as Anchor));
     })
   }
 

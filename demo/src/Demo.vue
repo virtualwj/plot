@@ -24,24 +24,23 @@
 import {onMounted, ref} from "vue";
 import {Stage, render, Rect, Circle, Polygon} from "@plot/core"
 import {GuideLine} from "@plot/plugin-guide-line";
+import {Edge} from "@plot/core/src/edges/Edge";
 
 let stage: Stage
 
 function addSquare() {
-  stage.addNode(new Rect({
+  const rect = new Rect({
     x: 100,
     y: 100,
     w: 100,
     h: 100,
-      layer: 10,
+    layer: 10,
     drawOptions: {
       fill: "red"
     }
-  }, stage))
-}
-
-function addCircle() {
-  stage.addNode(new Circle({
+  }, stage)
+  stage.addNode(rect)
+  const circle = new Circle({
     x: 300,
     y: 100,
     r: 50,
@@ -50,7 +49,14 @@ function addCircle() {
       fill: "green",
       stroke: "orange"
     }
-  }, stage))
+  }, stage)
+  stage.addNode(circle)
+    stage.addEdge(new Edge(rect.nodeAnchor.anchors[4], circle.nodeAnchor.anchors[0]))
+
+}
+
+function addCircle() {
+
 }
 
 function deleteShape() {

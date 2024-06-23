@@ -2,10 +2,12 @@ import {Stage, StageMode} from "../Stage";
 import {Anchor} from "../nodes/anchors/Anchor";
 import {Edge} from "../edges/Edge";
 import {Plugin} from "../Plugin";
+import {EdgePointer} from "../edges/EdgePointer";
 
 
 export class LineShape extends Plugin {
   public name = "EventManager"
+  public strictMode = false
   public activeMode: Array<StageMode> = ["drag"]
   static priority: number = 0
 
@@ -44,17 +46,21 @@ export class LineShape extends Plugin {
       if (!this.active) {
         return
       }
-
+      let added = false
       if (stage.isAddingEdge && stage.isAddingStartAnchor) {
         stage.nodes.forEach((node, nodeIndex) => {
           node.nodeAnchor.anchors.some((anchor, anchorIndex) => {
             if (anchor.isPointInPath(x, y)) {
               stage.edges.push(new Edge(stage.isAddingStartAnchor as Anchor, anchor))
+              added = true;
               return true
             }
-            return false
           });
         });
+
+        if (!this.strictMode && !added) {
+          stage.edges.push(new Edge(stage.isAddingStartAnchor as Anchor, new EdgePointer(x, y, stage)));
+        }
       }
       reset()
       stage.draw();

@@ -11,7 +11,7 @@ export class HandWriting extends Node {
   public type = 'polygon'
   public x: number
   public y: number
-  public initPoint: Array<Point>
+  public initPoint: Array<Point> = [];
 
   constructor(public points: Array<Point>, public stage: Stage) {
     super(stage);

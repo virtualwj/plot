@@ -210,7 +210,7 @@ export class Stage extends EventEmitter<StageEvent> {
     // this.nodes.forEach(node => node.draw())
     // this.edges.forEach(edge => edge.draw())
     renderByPriority.forEach(obj => {
-      obj.draw();
+      obj.draw(this);
     })
 
     if (this.engine instanceof CanvasDrawer) {
