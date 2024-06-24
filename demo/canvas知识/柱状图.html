@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Bar Chart</title>
+</head>
+<body>
+<canvas id="barChart" width="600" height="400"></canvas>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvas = document.getElementById("barChart");
+        const ctx = canvas.getContext("2d");
+
+        // 样本数据
+        const data = [65, 59, 80, 81, 56, 55, 40];
+        const labels = ["January", "February", "March", "April", "May", "June", "July"];
+
+        // 柱状图配置
+        const chartConfig = {
+            width: canvas.width,
+            height: canvas.height,
+            padding: 50,
+            barWidth: 40,
+            barSpacing: 20,
+            axisColor: "#333",
+            barColor: "#4285F4",
+            gridColor: "#ccc",
+            numYAxisTicks: 5,
+            arrowSize: 10, // 箭头大小
+            tooltip: {
+                padding: 10,
+                backgroundColor: "#333",
+                textColor: "#fff",
+                font: "12px Arial",
+                cornerRadius: 5
+            }
+        };
+
+        let hoveredBarIndex = -1; // 当前悬停的柱子索引
+
+        // 计算最大值和比例
+        const maxValue = Math.max(...data);
+        const scaleY = (chartConfig.height - chartConfig.padding * 2) / maxValue;
+
+        // 绘制箭头
+        function drawArrow(fromX, fromY, toX, toY) {
+            const headlen = chartConfig.arrowSize; // 箭头长度
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = chartConfig.axisColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 绘制X和Y轴
+        function drawAxes() {
+            // Y轴
+            drawArrow(chartConfig.padding, chartConfig.height - chartConfig.padding, chartConfig.padding, chartConfig.padding);
+            // X轴
+            drawArrow(chartConfig.padding, chartConfig.height - chartConfig.padding, chartConfig.width - chartConfig.padding, chartConfig.height - chartConfig.padding);
+        }
+
+        // 绘制Y轴刻度和网格线
+        function drawYAxis() {
+            const step = maxValue / chartConfig.numYAxisTicks;
+            for (let i = 0; i <= chartConfig.numYAxisTicks; i++) {
+                const y = chartConfig.height - chartConfig.padding - i * step * scaleY;
+                const value = i * step;
+
+                // 网格线
+                ctx.beginPath();
+                ctx.moveTo(chartConfig.padding, y);
+                ctx.lineTo(chartConfig.width - chartConfig.padding, y);
+                ctx.strokeStyle = chartConfig.gridColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // 刻度
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#000";
+                ctx.fillText(value.toFixed(0), chartConfig.padding - 10, y + 5);
+            }
+        }
+
+        // 绘制柱状图
+        function drawBars() {
+            ctx.fillStyle = chartConfig.barColor;
+            data.forEach((value, index) => {
+                const x = chartConfig.padding + index * (chartConfig.barWidth + chartConfig.barSpacing) + chartConfig.barSpacing;
+                const y = chartConfig.height - chartConfig.padding - value * scaleY;
+                const barHeight = value * scaleY;
+
+                ctx.fillRect(x, y, chartConfig.barWidth, barHeight);
+
+                // 绘制标签
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#000";
+                ctx.fillText(labels[index], x + chartConfig.barWidth / 2, chartConfig.height - chartConfig.padding + 20);
+            });
+        }
+
+        // 绘制提示框
+        function drawTooltip(x, y, text) {
+            const { padding, backgroundColor, textColor, font, cornerRadius } = chartConfig.tooltip;
+            ctx.font = font;
+            const textWidth = ctx.measureText(text).width;
+            const textHeight = parseInt(ctx.font, 10); // 大致估算文字高度
+
+            const boxWidth = textWidth + 2 * padding;
+            const boxHeight = textHeight + 2 * padding;
+
+            // 绘制提示框背景
+            ctx.fillStyle = backgroundColor;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + boxWidth, y);
+            ctx.arcTo(x + boxWidth + cornerRadius, y, x + boxWidth + cornerRadius, y + boxHeight, cornerRadius);
+            ctx.lineTo(x + boxWidth + cornerRadius, y + boxHeight);
+            ctx.arcTo(x + boxWidth + cornerRadius, y + boxHeight + cornerRadius, x + boxWidth, y + boxHeight + cornerRadius, cornerRadius);
+            ctx.lineTo(x, y + boxHeight + cornerRadius);
+            ctx.arcTo(x - cornerRadius, y + boxHeight + cornerRadius, x - cornerRadius, y + boxHeight, cornerRadius);
+            ctx.lineTo(x - cornerRadius, y);
+            ctx.arcTo(x - cornerRadius, y - cornerRadius, x, y - cornerRadius, cornerRadius);
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制提示框文字
+            ctx.fillStyle = textColor;
+            ctx.textAlign = "left";
+            ctx.fillText(text, x + padding, y + padding + textHeight / 2);
+        }
+
+        // 处理鼠标移动事件
+        canvas.addEventListener("mousemove", function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            hoveredBarIndex = -1;
+            data.forEach((value, index) => {
+                const x = chartConfig.padding + index * (chartConfig.barWidth + chartConfig.barSpacing) + chartConfig.barSpacing;
+                const y = chartConfig.height - chartConfig.padding - value * scaleY;
+                const barHeight = value * scaleY;
+
+                if (mouseX > x && mouseX < x + chartConfig.barWidth && mouseY > y && mouseY < y + barHeight) {
+                    hoveredBarIndex = index;
+                }
+            });
+
+            drawChart();
+            if (hoveredBarIndex !== -1) {
+                const x = chartConfig.padding + hoveredBarIndex * (chartConfig.barWidth + chartConfig.barSpacing) + chartConfig.barSpacing;
+                const y = chartConfig.height - chartConfig.padding - data[hoveredBarIndex] * scaleY;
+                const tooltipText = `${labels[hoveredBarIndex]}: ${data[hoveredBarIndex]}`;
+                drawTooltip(mouseX, mouseY - 30, tooltipText);
+            }
+        });
+
+        // 绘制所有内容
+        function drawChart() {
+            ctx.clearRect(0, 0, chartConfig.width, chartConfig.height);
+            drawAxes();
+            drawYAxis();
+            drawBars();
+        }
+
+        drawChart();
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Smooth Line Chart</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<svg width="200" height="200"  >
+    <g transform="scale(2, 2) translate(50, 50) ">
+        <rect x="10" y="10" width="100" height="100" fill="blue" />
+    </g>
+    <rect x="10" y="10" width="100" height="100" fill="yellow" />
+
+</svg>
+
+<canvas id="myCanvas" width="600" height="400"></canvas>
+<script>
+    const canvas = document.getElementById('myCanvas');
+    const context = canvas.getContext('2d');
+    // / 绘制一个矩形
+    context.fillStyle = 'blue';
+    context.fillRect(50, 50, 100, 100);
+
+    context.save();
+
+    // / 水平倾斜45度（PI/4弧度）
+    const angle = Math.PI / 4;
+    context.setTransform(1, Math.tan(angle), 0, 1, 0, 0);
+
+    // 绘制一个矩形
+    context.fillStyle = 'yellow';
+    context.fillRect(50, 50, 100, 100);
+
+    context.restore();
+
+    // / 绘制一个矩形
+    context.fillStyle = 'blue';
+    context.fillRect(300, 50, 100, 100);
+
+    context.save();
+
+    // / 水平倾斜45度（PI/4弧度）
+    const angle2 = Math.PI / 4;
+    context.setTransform(1, 0, Math.tan(angle2), 1, 0, 0);
+
+    // 绘制一个矩形
+    context.fillStyle = 'yellow';
+    context.fillRect(300, 50, 100, 100);
+
+    context.restore();
+
+    // 旋转45度（PI/4弧度）
+    // 矩形的参数
+    const rectX = 50;  // 矩形左上角的x坐标
+    const rectY = 50;  // 矩形左上角的y坐标
+    const rectWidth = 100;  // 矩形的宽度
+    const rectHeight = 100;  // 矩形的高度
+
+    // 计算矩形中心点
+    const centerX = rectX + rectWidth / 2;
+    const centerY = rectY + rectHeight / 2;
+
+    // 旋转角度
+    const angle3 = Math.PI / 4;  // 45度
+
+    // 保存当前的绘图状态
+    context.save();
+
+    // 将原点平移到矩形的中心
+    context.translate(centerX, centerY);
+
+    // 进行旋转
+    context.rotate(angle3);
+
+    // 将原点平移回矩形的左上角
+    context.translate(-centerX, -centerY);
+
+    // 绘制矩形
+    context.fillStyle = 'green';
+    context.fillRect(rectX, rectY, rectWidth, rectHeight);
+
+    // 恢复之前的绘图状态
+    context.restore();
+
+
+
+
+
+</script>
+</body>
+</html>

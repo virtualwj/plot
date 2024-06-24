@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Pie Chart with Tooltip and Legend</title>
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+<canvas id="pieChart" width="600" height="400"></canvas>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvas = document.getElementById("pieChart");
+        const ctx = canvas.getContext("2d");
+
+        // 样本数据
+        const data = [65, 59, 80, 81, 56];
+        const labels = ["January", "February", "March", "April", "May"];
+        const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+
+        // 饼图配置
+        const chartConfig = {
+            width: canvas.width,
+            height: canvas.height,
+            radius: Math.min(canvas.width, canvas.height) / 3,
+            centerX: canvas.width / 2,
+            centerY: canvas.height / 2 + 20,
+            tooltip: {
+                padding: 10,
+                backgroundColor: "#333",
+                textColor: "#fff",
+                font: "12px Arial",
+                cornerRadius: 5
+            },
+            legend: {
+                font: "12px Arial",
+                textColor: "#000",
+                padding: 10,
+                boxSize: 10,
+                spacing: 20,
+                top: 10
+            }
+        };
+
+        let hoveredIndex = -1; // 当前悬停的扇区索引
+
+        // 绘制图例
+        function drawLegend() {
+            ctx.font = chartConfig.legend.font;
+            labels.forEach((label, index) => {
+                ctx.fillStyle = colors[index];
+                ctx.fillRect(chartConfig.legend.padding, chartConfig.legend.top + index * chartConfig.legend.spacing, chartConfig.legend.boxSize, chartConfig.legend.boxSize);
+                ctx.fillStyle = chartConfig.legend.textColor;
+                ctx.textAlign = "left";
+                ctx.fillText(label, chartConfig.legend.padding + chartConfig.legend.boxSize + 10, chartConfig.legend.top + index * chartConfig.legend.spacing + chartConfig.legend.boxSize);
+            });
+        }
+
+        // 绘制饼图
+        function drawPieChart() {
+            let startAngle = 0;
+            const totalValue = data.reduce((acc, val) => acc + val, 0);
+
+            data.forEach((value, index) => {
+                const sliceAngle = (value / totalValue) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(chartConfig.centerX, chartConfig.centerY);
+                ctx.arc(chartConfig.centerX, chartConfig.centerY, chartConfig.radius, startAngle, startAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = colors[index];
+                ctx.fill();
+
+                // 检测鼠标悬停的扇区
+                if (hoveredIndex === index) {
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = "#000";
+                    ctx.stroke();
+                }
+
+                startAngle += sliceAngle;
+            });
+        }
+
+        // 绘制提示框
+        function drawTooltip(x, y, text) {
+            const { padding, backgroundColor, textColor, font, cornerRadius } = chartConfig.tooltip;
+            ctx.font = font;
+            const textWidth = ctx.measureText(text).width;
+            const textHeight = parseInt(ctx.font, 10); // 大致估算文字高度
+
+            const boxWidth = textWidth + 2 * padding;
+            const boxHeight = textHeight + 2 * padding;
+
+            // 绘制提示框背景
+            ctx.fillStyle = backgroundColor;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + boxWidth, y);
+            ctx.arcTo(x + boxWidth + cornerRadius, y, x + boxWidth + cornerRadius, y + boxHeight, cornerRadius);
+            ctx.lineTo(x + boxWidth + cornerRadius, y + boxHeight);
+            ctx.arcTo(x + boxWidth + cornerRadius, y + boxHeight + cornerRadius, x + boxWidth, y + boxHeight + cornerRadius, cornerRadius);
+            ctx.lineTo(x, y + boxHeight + cornerRadius);
+            ctx.arcTo(x - cornerRadius, y + boxHeight + cornerRadius, x - cornerRadius, y + boxHeight, cornerRadius);
+            ctx.lineTo(x - cornerRadius, y);
+            ctx.arcTo(x - cornerRadius, y - cornerRadius, x, y - cornerRadius, cornerRadius);
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制提示框文字
+            ctx.fillStyle = textColor;
+            ctx.textAlign = "left";
+            ctx.fillText(text, x + padding, y + padding + textHeight / 2);
+        }
+
+        // 处理鼠标移动事件
+        canvas.addEventListener("mousemove", function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            const dx = mouseX - chartConfig.centerX;
+            const dy = mouseY - chartConfig.centerY;
+            const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+            if (distanceFromCenter > chartConfig.radius) {
+                hoveredIndex = -1;
+            } else {
+                let angle = Math.atan2(dy, dx);
+                if (angle < 0) angle += 2 * Math.PI;
+
+                let startAngle = 0;
+                hoveredIndex = -1;
+                data.forEach((value, index) => {
+                    const sliceAngle = (value / totalValue) * 2 * Math.PI;
+                    if (angle >= startAngle && angle < startAngle + sliceAngle) {
+                        hoveredIndex = index;
+                    }
+                    startAngle += sliceAngle;
+                });
+            }
+
+            drawChart();
+            if (hoveredIndex !== -1) {
+                const tooltipText = `${labels[hoveredIndex]}: ${data[hoveredIndex]}`;
+                drawTooltip(mouseX + 10, mouseY - 30, tooltipText);
+            }
+        });
+
+        // 绘制所有内容
+        function drawChart() {
+            ctx.clearRect(0, 0, chartConfig.width, chartConfig.height);
+            drawLegend();
+            drawPieChart();
+        }
+
+        drawChart();
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Smooth Line Chart</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="lineChart" width="600" height="400"></canvas>
+<script>
+    const canvas = document.getElementById('lineChart');
+    const ctx = canvas.getContext('2d');
+
+    // Data points for the line chart
+    const points = [
+        { x: 50, y: 300 },
+        { x: 100, y: 150 },
+        { x: 200, y: 200 },
+        { x: 300, y: 100 },
+        { x: 400, y: 250 },
+        { x: 500, y: 180 }
+    ];
+
+    // Function to draw a smooth line
+    function drawSmoothLine(ctx, points) {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+
+        for (let i = 0; i < points.length - 1; i++) {
+            let x_mid = (points[i].x + points[i + 1].x) / 2;
+            let y_mid = (points[i].y + points[i + 1].y) / 2;
+            let cp_x1 = (x_mid + points[i].x) / 2;
+            let cp_x2 = (x_mid + points[i + 1].x) / 2;
+
+            ctx.quadraticCurveTo(cp_x1, points[i].y, x_mid, y_mid);
+            ctx.quadraticCurveTo(cp_x2, points[i + 1].y, points[i + 1].x, points[i + 1].y);
+        }
+        ctx.stroke();
+    }
+
+    // Function to draw the points
+    function drawPoints(ctx, points) {
+        ctx.fillStyle = 'red';
+        points.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+
+    // Function to draw axes with data labels
+    function drawAxes(ctx) {
+        // Draw x-axis and y-axis
+        ctx.beginPath();
+        ctx.moveTo(50, 350); // x-axis start point
+        ctx.lineTo(550, 350); // x-axis end point
+        ctx.moveTo(50, 350); // y-axis start point
+        ctx.lineTo(50, 50); // y-axis end point
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw x-axis labels
+        for (let i = 0; i <= 5; i++) {
+            let x = 50 + i * 100;
+            ctx.fillText((x - 50).toString(), x, 370);
+            ctx.moveTo(x, 350);
+            ctx.lineTo(x, 345);
+        }
+
+        // Draw y-axis labels
+        for (let i = 0; i <= 5; i++) {
+            let y = 350 - i * 60;
+            ctx.fillText((350 - y).toString(), 20, y);
+            ctx.moveTo(50, y);
+            ctx.lineTo(55, y);
+        }
+        ctx.stroke();
+    }
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the axes with labels
+    drawAxes(ctx);
+
+    // Draw the smooth line
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
+    drawSmoothLine(ctx, points);
+
+    // Draw the data points
+    drawPoints(ctx, points);
+</script>
+</body>
+</html>

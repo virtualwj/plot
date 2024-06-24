@@ -1,6 +1,6 @@
 {
-  "name": "@plot/plugin-mesh",
-  "version": "1.0.0",
+  "name": "@plot/plugin-chart",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs",
   "module": "./src/index.ts",
