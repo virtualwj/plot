@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpm -r --filter=@plot/demo run dev",
-    "build": "pnpm --filter=!@plot/demo run build"
+    "build": "pnpm --filter=!@plot/demo run build",
+    "preview": "pnpm --filter=@plot/demo run build"
   },
   "keywords": [],
   "author": "",
